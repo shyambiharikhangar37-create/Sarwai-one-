@@ -19,12 +19,12 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .chat-container {
             width: 100%;
-            max-width: 1000px; /* बड़ी स्क्रीन के लिए चौड़ाई थोड़ी बढ़ाई गई है */
+            max-width: 600px;
             background: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -33,50 +33,55 @@
             flex-direction: column;
         }
 
+        /* वीडियो सेक्शन को रिलेटिव बनाया ताकि ओवरले काम कर सके */
         .video-section {
-            display: flex;
-            background: #111;
-            padding: 15px;
-            gap: 15px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .video-box {
             position: relative;
-            background: #222;
-            border-radius: 8px;
+            background: #111;
+            width: 100%;
+            aspect-ratio: 4/3; /* मोबाइल पर वीडियो का सही अनुपात */
             overflow: hidden;
-            aspect-ratio: 4/3;
         }
 
-        /* आपका (Local) कैमरा छोटा रखने के लिए */
-        .video-section .video-box:first-child {
-            flex: 1; 
-            max-width: 240px; /* आपका कैमरा एक सीमित छोटे साइज में रहेगा */
+        /* सामने वाले (Remote) का कैमरा - इसे पूरी स्क्रीन पर सेट किया */
+        .video-box.remote-box {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
-        /* सामने वाले (Remote) का कैमरा बड़ा दिखाने के लिए */
-        .video-section .video-box:last-child {
-            flex: 3; /* यह आपके कैमरे से 3 गुना बड़ा दिखेगा */
+        /* आपका (Local) कैमरा - इसे ऊपर छोटे तैरते हुए बॉक्स में बदला */
+        .video-box.local-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 90px;  /* मोबाइल के हिसाब से छोटा साइज */
+            height: 120px;
+            border-radius: 6px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10; /* यह सामने वाले के वीडियो के ऊपर तैरता रहेगा */
+            overflow: hidden;
         }
 
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* वीडियो को बिना खींचे या स्ट्रेच किए साफ दिखाता है */
+            object-fit: cover;
         }
 
         .video-label {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 5px;
+            left: 5px;
             background: rgba(0, 0, 0, 0.6);
             color: #fff;
-            padding: 4px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-size: 12px;
-            z-index: 2;
+            font-size: 10px;
+            z-index: 12;
         }
 
         .controls {
@@ -103,7 +108,7 @@
         .text-chat-section {
             display: flex;
             flex-direction: column;
-            height: 300px;
+            height: 350px;
             background: #fff;
         }
 
@@ -171,7 +176,6 @@
             cursor: not-allowed;
         }
 
-        /* कस्टम पॉपअप (Modal CSS) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -211,25 +215,21 @@
             font-size: 15px;
             font-weight: bold;
         }
-
-        .modal-btn:hover {
-            background: #0056b3;
-        }
     </style>
 </head>
 <body>
 
     <div class="chat-container">
         <div class="video-section">
-            <!-- आपका छोटा वीडियो बॉक्स -->
-            <div class="video-box">
+            <!-- आपका तैरता हुआ छोटा वीडियो बॉक्स (local-box) -->
+            <div class="video-box local-box">
                 <video id="localVideo" autoplay playsinline muted></video>
-                <div class="video-label">आप (Local)</div>
+                <div class="video-label">आप</div>
             </div>
-            <!-- सामने वाले का बड़ा वीडियो बॉक्स -->
-            <div class="video-box">
+            <!-- सामने वाले का फुल-स्क्रीन बड़ा वीडियो बॉक्स (remote-box) -->
+            <div class="video-box remote-box">
                 <video id="remoteVideo" autoplay playsinline></video>
-                <div class="video-label">सामने वाला (Remote)</div>
+                <div class="video-label">सामने वाला</div>
             </div>
         </div>
 
@@ -248,7 +248,6 @@
         </div>
     </div>
 
-    <!-- कस्टम पॉपअप विंडो HTML -->
     <div class="modal-overlay" id="permissionModal">
         <div class="modal-box">
             <p><strong>चैट करने के लिए कैमरा और माइक की अनुमति आवश्यक है।</strong> <br><br> कृपया ब्राउज़र के ऊपरी हिस्से में आने वाले पॉपअप पर 'Allow/अनुमति' पर क्लिक करें।</p>
@@ -268,11 +267,10 @@
 
         let localStream;
 
-        // मुख्य कैमरा शुरू करने वाला फंक्शन (HD सेटिंग्स के साथ)
         async function openCamera() {
-            permissionModal.style.display = 'none'; // पॉपअप छुपाएं
+            permissionModal.style.display = 'none';
             try {
-                // साफ़ वीडियो के लिए HD (720p) रेजोल्यूशन रिक्वेस्ट की गई है
+                // साफ़ वीडियो के लिए HD रेजोल्यूशन रिक्वेस्ट
                 localStream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
                         width: { ideal: 1280 },
@@ -283,14 +281,13 @@
                 });
                 
                 localVideo.srcObject = localStream;
-                // टेस्टिंग के लिए लोकल स्ट्रीम को ही रिमोट में भी डाल रहे हैं
                 remoteVideo.srcObject = localStream; 
 
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 startBtn.style.display = 'none';
 
-                appendMessage('सिस्टम', 'कैमरा कनेक्ट हो गया है! वीडियो अब HD में साफ़ दिखेगा।', 'system');
+                appendMessage('सिस्टम', 'कैमरा कनेक्ट हो गया है! अब वीडियो साफ़ और बड़ा दिखेगा।', 'system');
             } catch (error) {
                 console.error('Error:', error);
                 permissionModal.style.display = 'flex';
@@ -299,7 +296,6 @@
 
         startBtn.addEventListener('click', openCamera);
         modalOkBtn.addEventListener('click', openCamera);
-
         sendBtn.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
@@ -312,22 +308,19 @@
             appendMessage('आप', text, 'you');
             messageInput.value = '';
             
-            // डमी रिस्पांस टेस्ट करने के लिए
             setTimeout(() => {
-                appendMessage('सामने वाला', 'नमस्ते! आपका वीडियो बहुत साफ़ दिख रहा है।', 'stranger');
+                appendMessage('सामने वाला', 'नमस्ते! आपका नया लेआउट बहुत बढ़िया काम कर रहा है।', 'stranger');
             }, 1000);
         }
 
         function appendMessage(sender, text, type) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', type);
-            
             if (type === 'system') {
                 msgDiv.innerText = text;
             } else {
                 msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
             }
-            
             chatWindow.appendChild(msgDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
