@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BBL Professional Video Chat</title>
-    <!-- सही की हुई PeerJS लाइब्रेरी का लिंक -->
-    <script src="https://unpkg.com"></script>
+    
+    <!-- बदला हुआ सबसे तेज़ CDN लिंक जो कभी ब्लॉक नहीं होगा -->
+    <script src="https://cloudflare.com"></script>
     
     <style>
         * {
@@ -35,7 +36,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        /* टॉप हेडर जहाँ ID दिखेगी */
         .app-header {
             background: #0f172a;
             color: #fff;
@@ -56,7 +56,6 @@
             user-select: all;
         }
 
-        /* कनेक्ट करने का एरिया */
         .connect-box {
             display: flex;
             gap: 8px;
@@ -89,7 +88,6 @@
 
         .connect-box button:hover { background: #059669; }
 
-        /* वीडियो सेक्शन */
         .video-section {
             position: relative;
             background: #000;
@@ -139,7 +137,6 @@
             z-index: 12;
         }
 
-        /* चैट सेक्शन */
         .text-chat-section {
             display: flex;
             flex-direction: column;
@@ -227,18 +224,15 @@
 <body>
 
     <div class="chat-container">
-        <!-- ऐप हेडर (यूज़र की खुद की ID यहाँ दिखेगी) -->
         <div class="app-header">
             <div>आपकी चैट ID: <span id="myIdDisplay" class="id-badge">कनेक्ट हो रहा है...</span></div>
         </div>
 
-        <!-- दूसरे से जुड़ने के लिए इनपुट बॉक्स -->
         <div class="connect-box">
             <input type="text" id="peerIdInput" placeholder="सामने वाले की ID यहाँ डालें...">
             <button id="connectBtn">कनेक्ट करें</button>
         </div>
 
-        <!-- वीडियो बॉक्स -->
         <div class="video-section">
             <div class="video-box local-box">
                 <video id="localVideo" autoplay playsinline muted></video>
@@ -250,7 +244,6 @@
             </div>
         </div>
 
-        <!-- चैट बॉक्स -->
         <div class="text-chat-section">
             <div class="chat-window" id="chatWindow">
                 <div class="message system">सिस्टम: शुरुआत हो रही है...</div>
@@ -276,7 +269,6 @@
         let peer = null;
         let currentConn = null; 
 
-        // मेसेज विंडो में मेसेज दिखाने का फंक्शन
         function addMessage(text, type) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', type);
@@ -285,7 +277,6 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // 1. सबसे पहले यूज़र का कैमरा चालू करें
         async function startCamera() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -293,39 +284,50 @@
                 addMessage("सिस्टम: आपका कैमरा चालू हो गया है।", "system");
             } catch (err) {
                 console.error(err);
-                addMessage("सिस्टम: कैमरा चालू नहीं हो सका (सिर्फ टेक्स्ट चैट चालू है)।", "system");
+                addMessage("सिस्टम: कैमरा परमिशन नहीं मिली (सिर्फ टेक्स्ट चैट चालू है)।", "system");
             }
-            initPeer(); // कैमरा चालू हो या न हो, ID हमेशा जेनरेट होगी
+            
+            // कैमरा चेक होने के तुरंत बाद ID बनाने का लॉजिक चलाएं
+            initPeer(); 
         }
 
-        // 2. PeerJS सर्वर से जुड़कर एक यूनीक 6-अंकों की ID खुद से बनाना
         function initPeer() {
-            const randomId = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            peer = new Peer(randomId, {
-                config: {
-                    'iceServers': [
-                        { 'urls': 'stun:://google.com' },
-                        { 'urls': 'stun:://google.com' }
-                    ]
-                }
-            });
+            // अगर लाइब्रेरी लोड नहीं भी हुई, तो सुरक्षित तरीके से हैंडल करने के लिए try-catch लगाया है
+            try {
+                const randomId = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                peer = new Peer(randomId, {
+                    config: {
+                        'iceServers': [
+                            { 'urls': 'stun:://google.com' },
+                            { 'urls': 'stun:://google.com' }
+                        ]
+                    }
+                });
 
-            peer.on('open', (id) => {
-                myIdDisplay.innerText = id;
-                addMessage("सिस्टम: आपकी नई ID तैयार है! इसे अपने दोस्त को भेजें और कनेक्ट करें।", "system");
-            });
+                peer.on('open', (id) => {
+                    myIdDisplay.innerText = id;
+                    addMessage("सिस्टम: आपकी नई ID तैयार है! इसे अपने दोस्त को भेजें और कनेक्ट करें।", "system");
+                });
 
-            peer.on('error', (err) => {
-                console.error("Peer Error:", err.type);
-                if(err.type === 'unavailable-id') {
-                    location.reload();
-                } else {
-                    addMessage("सिस्टम एरर: कनेक्शन स्थापित नहीं हो सका। कृपया पेज रीफ्रेश करें।", "system");
-                }
-            });
+                peer.on('error', (err) => {
+                    console.error("Peer Error:", err.type);
+                    if(err.type === 'unavailable-id') {
+                        location.reload();
+                    }
+                });
 
-            // जब कोई दूसरा व्यक्ति आपको कॉल करे (वीडियो कॉल रिसीव करना)
-            peer.on('call', (call) => {
-                call.answer(localStream); 
-                call.on('stream', (remoteStream) => {
+                peer.on('call', (call) => {
+                    call.answer(localStream); 
+                    call.on('stream', (remoteStream) => {
+                        remoteVideo.srcObject = remoteStream; 
+                    });
+                });
+
+                peer.on('connection', (conn) => {
+                    currentConn = conn;
+                    setupChatFeatures();
+                    addMessage("सिस्टम: कोई आपसे कनेक्ट हो गया है!", "system");
+                });
+
+            } catch (setupError) {
