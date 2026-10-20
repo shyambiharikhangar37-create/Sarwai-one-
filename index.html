@@ -17,32 +17,31 @@
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* टॉप से लॉक रखने के लिए */
+            align-items: flex-start;
             height: 100vh;
-            height: 100dvh; /* मोबाइल कीबोर्ड के डायनामिक साइज के लिए */
+            height: 100dvh;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* मुख्य स्क्रीन को फालतू स्क्रॉल होने से रोकने के लिए */
+            overflow: hidden;
         }
 
         .chat-container {
             width: 100%;
             max-width: 600px;
-            height: 100%; /* कंटेनर अब मोबाइल की पूरी हाइट लेगा */
+            height: 100%;
             background: #ffffff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* वीडियो सेक्शन स्थिर रहेगा और कीबोर्ड आने पर भी नहीं छिपेगा */
         .video-section {
             position: relative;
             background: #111;
             width: 100%;
-            aspect-ratio: 4/3; /* मोबाइल पर वीडियो का सही अनुपात */
+            aspect-ratio: 4/3;
             overflow: hidden;
-            flex-shrink: 0; /* इसे दबने या छोटा होने से रोकने के लिए */
+            flex-shrink: 0;
         }
 
         /* सामने वाले (Remote) का कैमरा */
@@ -55,11 +54,11 @@
             z-index: 1;
         }
 
-        /* आपका (Local) कैमरा - ऊपर छोटे तैरते हुए बॉक्स में */
+        /* सुधार: 'आप' (Local) कैमरा अब दाहिने के बजाय बाईं तरफ (Left: 10px) सेट है */
         .video-box.local-box {
             position: absolute;
             top: 10px;
-            right: 10px;
+            left: 10px; /* यहाँ 'right' की जगह 'left' कर दिया गया है */
             width: 90px;
             height: 120px;
             border-radius: 6px;
@@ -92,7 +91,7 @@
             padding: 10px;
             background: #f8f9fa;
             border-bottom: 1px solid #ddd;
-            flex-shrink: 0; /* यह भी अपनी जगह पर स्थिर रहेगा */
+            flex-shrink: 0;
         }
 
         #startBtn {
@@ -109,19 +108,18 @@
             background: #218838;
         }
 
-        /* चैट सेक्शन को बची हुई जगह में ऑटो-एडजस्ट करने के लिए */
         .text-chat-section {
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* बची हुई पूरी जगह यह खुद ले लेगा */
-            min-height: 0; /* फ्लेक्सबॉक्स में स्क्रॉलिंग को सही रखने के लिए */
+            flex-grow: 1;
+            min-height: 0;
             background: #fff;
         }
 
         .chat-window {
             flex: 1;
             padding: 15px;
-            overflow-y: auto; /* केवल मैसेजेस वाला हिस्सा ही ऊपर-नीचे स्क्रॉल होगा */
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -159,7 +157,7 @@
             border-top: 1px solid #ddd;
             gap: 10px;
             background: #fff;
-            flex-shrink: 0; /* कीबोर्ड आने पर इनपुट फील्ड नीचे बनी रहेगी */
+            flex-shrink: 0;
         }
 
         #messageInput {
@@ -229,12 +227,12 @@
 
     <div class="chat-container">
         <div class="video-section">
-            <!-- आपका तैरता हुआ छोटा वीडियो बॉक्स (local-box) -->
+            <!-- आपका तैरता हुआ छोटा वीडियो बॉक्स - अब बाईं तरफ दिखेगा -->
             <div class="video-box local-box">
                 <video id="localVideo" autoplay playsinline muted></video>
                 <div class="video-label">आप</div>
             </div>
-            <!-- सामने वाले का फुल-स्क्रीन बड़ा वीडियो बॉक्स (remote-box) -->
+            <!-- सामने वाले का फुल-स्क्रीन बड़ा वीडियो बॉक्स -->
             <div class="video-box remote-box">
                 <video id="remoteVideo" autoplay playsinline></video>
                 <div class="video-label">सामने वाला</div>
@@ -275,7 +273,6 @@
 
         let localStream;
 
-        // जब इनपुट बॉक्स पर फोकस हो (कीबोर्ड खुले), तो यह सुनिश्चित करेगा कि इनपुट बॉक्स छुपने न पाए
         messageInput.addEventListener('focus', () => {
             setTimeout(() => {
                 messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -297,7 +294,6 @@
                 localVideo.srcObject = localStream;
                 remoteVideo.srcObject = localStream;
                 
-                // कैमरा चालू होने पर इनपुट फील्ड्स को एक्टिवेट करें
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 
