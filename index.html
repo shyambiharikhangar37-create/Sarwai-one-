@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BBL chat</title>
+    <title>BBL Professional Video Chat</title>
+    <!-- PeerJS लाइब्रेरी वीडियो कॉल और कनेक्शन के लिए -->
+    <script src="https://unpkg.com"></script>
     
     <style>
         * {
@@ -14,30 +16,83 @@
         }
 
         body {
-            background-color: #f0f2f5;
+            background-color: #0f172a;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             height: 100vh;
             height: 100dvh;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
         }
 
         .chat-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             height: 100%;
-            background: #ffffff;
+            background: #1e293b;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
+        /* टॉप हेडर जहाँ ID दिखेगी */
+        .app-header {
+            background: #0f172a;
+            color: #fff;
+            padding: 12px 15px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .id-badge {
+            background: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: monospace;
+            user-select: all;
+        }
+
+        /* कनेक्ट करने का एरिया */
+        .connect-box {
+            display: flex;
+            gap: 8px;
+            padding: 10px 15px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+        }
+
+        .connect-box input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .connect-box button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .connect-box button:hover { background: #059669; }
+
+        /* वीडियो सेक्शन */
         .video-section {
             position: relative;
-            background: #111;
+            background: #000;
             width: 100%;
             aspect-ratio: 4/3;
             overflow: hidden;
@@ -55,13 +110,13 @@
 
         .video-box.local-box {
             position: absolute;
-            top: 10px;
+            bottom: 10px;
             right: 10px;
-            width: 90px;
-            height: 120px;
-            border-radius: 6px;
-            border: 2px solid #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 100px;
+            height: 135px;
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             z-index: 10;
             overflow: hidden;
         }
@@ -70,51 +125,27 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background: #222; /* कैमरा बंद होने पर बैकग्राउंड */
         }
 
         .video-label {
             position: absolute;
-            bottom: 5px;
+            top: 5px;
             left: 5px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(15, 23, 42, 0.7);
             color: #fff;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 11px;
             z-index: 12;
         }
 
-        .controls {
-            text-align: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-            flex-shrink: 0;
-        }
-
-        #cameraToggleBtn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 15px;
-            transition: background 0.3s;
-        }
-
-        #cameraToggleBtn:hover {
-            opacity: 0.9;
-        }
-
+        /* चैट सेक्शन */
         .text-chat-section {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
             min-height: 0;
-            background: #fff;
+            background: #0f172a;
         }
 
         .chat-window {
@@ -127,7 +158,7 @@
         }
 
         .message {
-            padding: 10px 14px;
+            padding: 8px 14px;
             border-radius: 12px;
             max-width: 80%;
             font-size: 14px;
@@ -136,63 +167,59 @@
         }
 
         .message.system {
-            background: #e9ecef;
-            color: #6c757d;
+            background: #334155;
+            color: #cbd5e1;
             align-self: center;
-            font-style: italic;
             font-size: 12px;
-            text-align: center;
+            border-radius: 6px;
         }
 
         .message.you {
-            background: #007bff;
+            background: #3b82f6;
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 2px;
         }
 
         .message.stranger {
-            background: #e4e6eb;
-            color: black;
+            background: #334155;
+            color: white;
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 2px;
         }
 
         .input-area {
             display: flex;
-            padding: 10px;
-            border-top: 1px solid #ddd;
+            padding: 12px;
+            border-top: 1px solid #334155;
             gap: 10px;
-            background: #fff;
-            flex-shrink: 0;
+            background: #1e293b;
         }
 
         #messageInput {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
+            padding: 10px 15px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
             border-radius: 20px;
             outline: none;
-            font-size: 15px;
-        }
-
-        #messageInput:focus {
-            border-color: #007bff;
+            font-size: 14px;
         }
 
         #sendBtn {
-            background: #007bff;
+            background: #3b82f6;
             color: white;
             border: none;
-            padding: 0 20px;
+            padding: 0 18px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
         }
 
         #sendBtn:disabled, #messageInput:disabled {
-            background: #cccccc;
-            color: #666;
+            background: #475569;
+            color: #94a3b8;
             cursor: not-allowed;
         }
     </style>
@@ -200,6 +227,18 @@
 <body>
 
     <div class="chat-container">
+        <!-- ऐप हेडर (यूज़र की खुद की ID यहाँ दिखेगी) -->
+        <div class="app-header">
+            <div>आपकी चैट ID: <span id="myIdDisplay" class="id-badge">लोड हो रहा है...</span></div>
+        </div>
+
+        <!-- दूसरे से जुड़ने के लिए इनपुट बॉक्स -->
+        <div class="connect-box">
+            <input type="text" id="peerIdInput" placeholder="सामने वाले की ID यहाँ डालें...">
+            <button id="connectBtn">कनेक्ट करें</button>
+        </div>
+
+        <!-- वीडियो बॉक्स -->
         <div class="video-section">
             <div class="video-box local-box">
                 <video id="localVideo" autoplay playsinline muted></video>
@@ -211,13 +250,10 @@
             </div>
         </div>
 
-        <div class="controls">
-            <button id="cameraToggleBtn">कैमरा चालू करें</button>
-        </div>
-
+        <!-- चैट बॉक्स -->
         <div class="text-chat-section">
             <div class="chat-window" id="chatWindow">
-                <div class="message system">सिस्टम: चैट शुरू करने के लिए ऊपर 'कैमरा चालू करें' बटन दबाएं।</div>
+                <div class="message system">सिस्टम: कैमरा चालू हो रहा है, कृपया अनुमति (Allow) दें...</div>
             </div>
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="अपना संदेश टाइप करें..." disabled>
@@ -229,116 +265,63 @@
     <script>
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
-        const cameraToggleBtn = document.getElementById('cameraToggleBtn');
+        const myIdDisplay = document.getElementById('myIdDisplay');
+        const peerIdInput = document.getElementById('peerIdInput');
+        const connectBtn = document.getElementById('connectBtn');
         const sendBtn = document.getElementById('sendBtn');
         const messageInput = document.getElementById('messageInput');
         const chatWindow = document.getElementById('chatWindow');
 
         let localStream = null;
-        let isCameraOn = false;
+        let peer = null;
+        let currentConn = null; // डेटा/टेक्स्ट चैट के लिए
 
-        // कीबोर्ड खुलने पर इनपुट को स्क्रीन पर दिखाने के लिए
-        messageInput.addEventListener('focus', () => {
-            setTimeout(() => {
-                messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 300);
-        });
-
-        // कैमरा चालू/बंद करने का लॉजिक (Toggle)
-        cameraToggleBtn.addEventListener('click', async () => {
-            if (!isCameraOn) {
-                // कैमरा चालू करना
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "user" }, 
-                        audio: true 
-                    });
-                    
-                    localVideo.srcObject = localStream;
-                    // नोट: असली ऐप में remoteVideo में दूसरे व्यक्ति का स्ट्रीम आएगा। 
-                    // डेमो के लिए हम अभी लोकल स्ट्रीम ही दिखा रहे हैं।
-                    remoteVideo.srcObject = localStream; 
-                    
-                    isCameraOn = true;
-                    cameraToggleBtn.innerText = "कैमरा बंद करें";
-                    cameraToggleBtn.style.background = "#dc3545"; // लाल रंग (बंद करने के लिए)
-                    
-                    // चैट एक्टिवेट करें
-                    messageInput.disabled = false;
-                    sendBtn.disabled = false;
-                    messageInput.focus();
-                    
-                    addSystemMessage("कैमरा और माइक चालू हो गया है। अब आप चैट कर सकते हैं।");
-                } catch (error) {
-                    console.error("कैमरा एक्सेस एरर:", error);
-                    alert("कैमरा चालू करने में समस्या आई। कृपया ब्राउज़र से कैमरा/माइक की अनुमति (Permission) जरूर दें।");
-                }
-            } else {
-                // कैमरा बंद करना
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                }
-                localVideo.srcObject = null;
-                remoteVideo.srcObject = null;
-                
-                isCameraOn = false;
-                cameraToggleBtn.innerText = "कैमरा चालू करें";
-                cameraToggleBtn.style.background = "#28a745"; // हरा रंग (चालू करने के लिए)
-                
-                // चैट डिसेबल करें (या आप चाहें तो चालू भी रख सकते हैं)
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
-                
-                addSystemMessage("कैमरा बंद कर दिया गया है।");
-            }
-        });
-
-        // मैसेज भेजने का फंक्शन
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === "") return;
-
-            // 1. अपना मैसेज जोड़ें
+        // मेसेज विंडो में मेसेज दिखाने का फंक्शन
+        function addMessage(text, type) {
             const msgDiv = document.createElement('div');
-            msgDiv.className = "message you";
+            msgDiv.classList.add('message', type);
             msgDiv.innerText = text;
             chatWindow.appendChild(msgDiv);
-
-            // 2. इनपुट साफ करें
-            messageInput.value = "";
-            
-            // 3. चैट विंडो को सबसे नीचे स्क्रॉल करें
             chatWindow.scrollTop = chatWindow.scrollHeight;
-
-            // 4. डेमो रिप्लाई (ताकि आप देख सकें कि चैट काम कर रही है)
-            // असली ऐप में यहाँ WebSocket या WebRTC का डेटा आएगा
-            setTimeout(() => {
-                const replyDiv = document.createElement('div');
-                replyDiv.className = "message stranger";
-                replyDiv.innerText = "यह एक ऑटो-रिप्लाई है। असली चैट के लिए सर्वर कनेक्ट करना होगा।";
-                chatWindow.appendChild(replyDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            }, 1000);
         }
 
-        // भेजें बटन पर क्लिक करने पर
-        sendBtn.addEventListener('click', sendMessage);
-
-        // Enter की दबाने पर मैसेज भेजने के लिए
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
+        // 1. सबसे पहले यूज़र का कैमरा चालू करें
+        async function startCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+                addMessage("सिस्टम: आपका कैमरा चालू हो गया है। अब ID जेनरेट हो रही है...", "system");
+                initPeer(); // कैमरा चालू होने के बाद कनेक्शन सर्वर से जुड़ें
+            } catch (err) {
+                console.error(err);
+                addMessage("सिस्टम: कैमरा एक्सेस नहीं मिला। कृपया परमिशन एलाउ करें।", "system");
             }
-        });
-
-        // सिस्टम मैसेज जोड़ने का हेल्पर फंक्शन
-        function addSystemMessage(text) {
-            const msg = document.createElement('div');
-            msg.className = "message system";
-            msg.innerText = text;
-            chatWindow.appendChild(msg);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
-    </script>
-</body>
-</html>
+
+        // 2. PeerJS सर्वर से जुड़कर एक यूनीक ID लें
+        function initPeer() {
+            peer = new Peer(); // PeerJS क्लाउड सर्वर का उपयोग
+
+            peer.on('open', (id) => {
+                myIdDisplay.innerText = id;
+                addMessage("सिस्टम: आप लाइव हैं। अपनी ID दूसरे यूज़र को भेजें या उसकी ID ऊपर डालें।", "system");
+            });
+
+            // जब कोई दूसरा व्यक्ति आपको कॉल करे (वीडियो कॉल रिसीव करना)
+            peer.on('call', (call) => {
+                call.answer(localStream); // अपना कैमरा स्ट्रीम भेजें
+                call.on('stream', (remoteStream) => {
+                    remoteVideo.srcObject = remoteStream; // सामने वाले का वीडियो दिखाएं
+                });
+            });
+
+            // जब कोई दूसरा व्यक्ति आपको चैट से जोड़े (डेटा रिसीव करना)
+            peer.on('connection', (conn) => {
+                currentConn = conn;
+                setupChatFeatures();
+                addMessage("सिस्टम: किसी ने आपसे चैट कनेक्ट की है!", "system");
+            });
+        }
+
+        // 3. किसी दूसरे यूजर से खुद कनेक्ट होना (जब आप 'कनेक्ट करें' दबाएं)
+        connectBtn.addEventListener('click', () => {
