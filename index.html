@@ -17,33 +17,35 @@
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: flex-start; /* टॉप से लॉक रखने के लिए */
             height: 100vh;
-            height: 100dvh;
+            height: 100dvh; /* मोबाइल कीबोर्ड के डायनामिक साइज के लिए */
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden; /* मुख्य स्क्रीन को फालतू स्क्रॉल होने से रोकने के लिए */
         }
 
         .chat-container {
             width: 100%;
             max-width: 600px;
-            height: 100%;
+            height: 100%; /* कंटेनर अब मोबाइल की पूरी हाइट लेगा */
             background: #ffffff;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
+        /* वीडियो सेक्शन स्थिर रहेगा और कीबोर्ड आने पर भी नहीं छिपेगा */
         .video-section {
             position: relative;
             background: #111;
             width: 100%;
-            aspect-ratio: 4/3;
+            aspect-ratio: 4/3; /* मोबाइल पर वीडियो का सही अनुपात */
             overflow: hidden;
-            flex-shrink: 0;
+            flex-shrink: 0; /* इसे दबने या छोटा होने से रोकने के लिए */
         }
 
+        /* सामने वाले (Remote) का कैमरा */
         .video-box.remote-box {
             width: 100%;
             height: 100%;
@@ -53,11 +55,11 @@
             z-index: 1;
         }
 
-        /* 'आप' (Local) कैमरा बाईं तरफ स्थिर */
+        /* आपका (Local) कैमरा - ऊपर छोटे तैरते हुए बॉक्स में */
         .video-box.local-box {
             position: absolute;
             top: 10px;
-            left: 10px;
+            right: 10px;
             width: 90px;
             height: 120px;
             border-radius: 6px;
@@ -90,7 +92,7 @@
             padding: 10px;
             background: #f8f9fa;
             border-bottom: 1px solid #ddd;
-            flex-shrink: 0;
+            flex-shrink: 0; /* यह भी अपनी जगह पर स्थिर रहेगा */
         }
 
         #startBtn {
@@ -107,18 +109,19 @@
             background: #218838;
         }
 
+        /* चैट सेक्शन को बची हुई जगह में ऑटो-एडजस्ट करने के लिए */
         .text-chat-section {
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            min-height: 0;
+            flex-grow: 1; /* बची हुई पूरी जगह यह खुद ले लेगा */
+            min-height: 0; /* फ्लेक्सबॉक्स में स्क्रॉलिंग को सही रखने के लिए */
             background: #fff;
         }
 
         .chat-window {
             flex: 1;
             padding: 15px;
-            overflow-y: auto;
+            overflow-y: auto; /* केवल मैसेजेस वाला हिस्सा ही ऊपर-नीचे स्क्रॉल होगा */
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -129,7 +132,6 @@
             border-radius: 8px;
             max-width: 75%;
             font-size: 14px;
-            word-wrap: break-word; /* लंबा टेक्स्ट होने पर लाइन टूटेगी */
         }
 
         .message.system {
@@ -157,7 +159,7 @@
             border-top: 1px solid #ddd;
             gap: 10px;
             background: #fff;
-            flex-shrink: 0;
+            flex-shrink: 0; /* कीबोर्ड आने पर इनपुट फील्ड नीचे बनी रहेगी */
         }
 
         #messageInput {
@@ -175,7 +177,6 @@
             padding: 0 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
         }
 
         #sendBtn:disabled, #messageInput:disabled {
@@ -228,10 +229,12 @@
 
     <div class="chat-container">
         <div class="video-section">
+            <!-- आपका तैरता हुआ छोटा वीडियो बॉक्स (local-box) -->
             <div class="video-box local-box">
                 <video id="localVideo" autoplay playsinline muted></video>
                 <div class="video-label">आप</div>
             </div>
+            <!-- सामने वाले का फुल-स्क्रीन बड़ा वीडियो बॉक्स (remote-box) -->
             <div class="video-box remote-box">
                 <video id="remoteVideo" autoplay playsinline></video>
                 <div class="video-label">सामने वाला</div>
@@ -272,46 +275,11 @@
 
         let localStream;
 
-        // मोबाइल कीबोर्ड खुलने पर इनपुट बॉक्स को स्क्रीन पर सही दिखाना
+        // जब इनपुट बॉक्स पर फोकस हो (कीबोर्ड खुले), तो यह सुनिश्चित करेगा कि इनपुट बॉक्स छुपने न पाए
         messageInput.addEventListener('focus', () => {
             setTimeout(() => {
                 messageInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 300);
-        });
-
-        // संदेश भेजने का नया और मुख्य फंक्शन (Fix Added)
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === "") return; // खाली मैसेज सेंड नहीं होगा
-
-            // 1. स्क्रीन पर आपका मैसेज जोड़ना
-            let msgDiv = document.createElement('div');
-            msgDiv.className = "message you";
-            msgDiv.innerText = "आप: " + text;
-            chatWindow.appendChild(msgDiv);
-
-            // 2. इनपुट बॉक्स को खाली करना और फोकस बनाए रखना
-            messageInput.value = "";
-            messageInput.focus();
-
-            // 3. नया मैसेज आने पर चैट विंडो को ऑटोमैटिक नीचे स्क्रॉल करना
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-
-            /* 
-               नोट: यदि आप WebRTC या Socket.io का उपयोग कर रहे हैं, 
-               तो सामने वाले को मैसेज भेजने का कोड यहाँ आएगा, जैसे:
-               dataChannel.send(text); 
-            */
-        }
-
-        // भेजें बटन पर क्लिक करने पर
-        sendBtn.addEventListener('click', sendMessage);
-
-        // कीबोर्ड का 'Enter' बटन दबाने पर भी मैसेज सेंड होगा
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
         });
 
         async function openCamera() {
@@ -329,6 +297,7 @@
                 localVideo.srcObject = localStream;
                 remoteVideo.srcObject = localStream;
                 
+                // कैमरा चालू होने पर इनपुट फील्ड्स को एक्टिवेट करें
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
                 
@@ -336,5 +305,18 @@
                 msg.className = "message system";
                 msg.innerText = "कैमरा कनेक्ट हो गया है! अब वीडियो साफ़ और बड़ा दिखेगा।";
                 chatWindow.appendChild(msg);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
                 
+            } catch (error) {
+                console.error("कैमरा एक्सेस एरर:", error);
+                alert("कैमरा चालू करने में समस्या आई। कृपया अनुमति जांचें।");
+            }
+        }
+
+        startBtn.addEventListener('click', () => {
+            permissionModal.style.display = 'flex';
+        });
+
+        modalOkBtn.addEventListener('click', openCamera);
+    </script>
+</body>
+</html>
