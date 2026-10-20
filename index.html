@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BBL Professional Video Chat</title>
-    <!-- PeerJS लाइब्रेरी वीडियो कॉल और कनेक्शन के लिए -->
+    <!-- सही की हुई PeerJS लाइब्रेरी का लिंक -->
     <script src="https://unpkg.com"></script>
     
     <style>
@@ -229,7 +229,7 @@
     <div class="chat-container">
         <!-- ऐप हेडर (यूज़र की खुद की ID यहाँ दिखेगी) -->
         <div class="app-header">
-            <div>आपकी चैट ID: <span id="myIdDisplay" class="id-badge">लोड हो रहा है...</span></div>
+            <div>आपकी चैट ID: <span id="myIdDisplay" class="id-badge">कनेक्ट हो रहा है...</span></div>
         </div>
 
         <!-- दूसरे से जुड़ने के लिए इनपुट बॉक्स -->
@@ -253,7 +253,7 @@
         <!-- चैट बॉक्स -->
         <div class="text-chat-section">
             <div class="chat-window" id="chatWindow">
-                <div class="message system">सिस्टम: कैमरा चालू हो रहा है, कृपया अनुमति (Allow) दें...</div>
+                <div class="message system">सिस्टम: शुरुआत हो रही है...</div>
             </div>
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="अपना संदेश टाइप करें..." disabled>
@@ -274,7 +274,7 @@
 
         let localStream = null;
         let peer = null;
-        let currentConn = null; // डेटा/टेक्स्ट चैट के लिए
+        let currentConn = null; 
 
         // मेसेज विंडो में मेसेज दिखाने का फंक्शन
         function addMessage(text, type) {
@@ -290,38 +290,42 @@
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 localVideo.srcObject = localStream;
-                addMessage("सिस्टम: आपका कैमरा चालू हो गया है। अब ID जेनरेट हो रही है...", "system");
-                initPeer(); // कैमरा चालू होने के बाद कनेक्शन सर्वर से जुड़ें
+                addMessage("सिस्टम: आपका कैमरा चालू हो गया है।", "system");
             } catch (err) {
                 console.error(err);
-                addMessage("सिस्टम: कैमरा एक्सेस नहीं मिला। कृपया परमिशन एलाउ करें।", "system");
+                addMessage("सिस्टम: कैमरा चालू नहीं हो सका (सिर्फ टेक्स्ट चैट चालू है)।", "system");
             }
+            initPeer(); // कैमरा चालू हो या न हो, ID हमेशा जेनरेट होगी
         }
 
-        // 2. PeerJS सर्वर से जुड़कर एक यूनीक ID लें
+        // 2. PeerJS सर्वर से जुड़कर एक यूनीक 6-अंकों की ID खुद से बनाना
         function initPeer() {
-            peer = new Peer(); // PeerJS क्लाउड सर्वर का उपयोग
+            const randomId = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            peer = new Peer(randomId, {
+                config: {
+                    'iceServers': [
+                        { 'urls': 'stun:://google.com' },
+                        { 'urls': 'stun:://google.com' }
+                    ]
+                }
+            });
 
             peer.on('open', (id) => {
                 myIdDisplay.innerText = id;
-                addMessage("सिस्टम: आप लाइव हैं। अपनी ID दूसरे यूज़र को भेजें या उसकी ID ऊपर डालें।", "system");
+                addMessage("सिस्टम: आपकी नई ID तैयार है! इसे अपने दोस्त को भेजें और कनेक्ट करें।", "system");
+            });
+
+            peer.on('error', (err) => {
+                console.error("Peer Error:", err.type);
+                if(err.type === 'unavailable-id') {
+                    location.reload();
+                } else {
+                    addMessage("सिस्टम एरर: कनेक्शन स्थापित नहीं हो सका। कृपया पेज रीफ्रेश करें।", "system");
+                }
             });
 
             // जब कोई दूसरा व्यक्ति आपको कॉल करे (वीडियो कॉल रिसीव करना)
             peer.on('call', (call) => {
-                call.answer(localStream); // अपना कैमरा स्ट्रीम भेजें
+                call.answer(localStream); 
                 call.on('stream', (remoteStream) => {
-                    remoteVideo.srcObject = remoteStream; // सामने वाले का वीडियो दिखाएं
-                });
-            });
-
-            // जब कोई दूसरा व्यक्ति आपको चैट से जोड़े (डेटा रिसीव करना)
-            peer.on('connection', (conn) => {
-                currentConn = conn;
-                setupChatFeatures();
-                addMessage("सिस्टम: किसी ने आपसे चैट कनेक्ट की है!", "system");
-            });
-        }
-
-        // 3. किसी दूसरे यूजर से खुद कनेक्ट होना (जब आप 'कनेक्ट करें' दबाएं)
-        connectBtn.addEventListener('click', () => {
