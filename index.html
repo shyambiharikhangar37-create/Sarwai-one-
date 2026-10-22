@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <meta name="theme-color" content="#000" />
 <title>Sarwai One - Modern Video Platform</title>
-<!-- Appwrite Web SDK (Optional: Uncomment if you plan to use Appwrite JS functions) -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script> -->
+<!-- ✅ Appwrite Web SDK (Ab Active Hai) -->
+<script src="https://cdn.jsdelivr.net/npm/appwrite@15.0.0"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;width:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
@@ -256,7 +256,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
 <script>
     // ==========================================
-    // Appwrite Configuration (उचित जगह जोड़ा गया)
+    // ✅ Appwrite Configuration & Initialization
     // ==========================================
     const APPWRITE_CONFIG = {
         endpoint: 'https://cloud.appwrite.io/v1',
@@ -266,13 +266,20 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         bucketId: '6aa2f5a00028668aa537'
     };
 
+    // Initialize Appwrite SDK
+    const { Client, Databases, Storage, ID } = Appwrite;
+    const client = new Client()
+        .setEndpoint(APPWRITE_CONFIG.endpoint)
+        .setProject(APPWRITE_CONFIG.projectId);
+    
+    const databases = new Databases(client);
+    const storage = new Storage(client);
+
     // ===== 100% Working Reliable Video URLs =====
     const videos = [
       { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "animation_studio", verified: true, title: "Big Buck Bunny - A classic animated short film 🐰", music: "Original Sound - Animation Studio", likes: "125K", comments: "3.2K", shares: "8.5K", desc: "Follow the adventures of a giant rabbit." },
       { src: "https://www.w3schools.com/html/movie.mp4", user: "nature_lover", verified: true, title: "Bear in the wild 🐻✨", music: "Nature Sounds - Wild", likes: "89K", comments: "2.1K", shares: "5.4K", desc: "A beautiful journey through the forest." },
-      { src: "https://media.w3.org/2010/05/sintel/trailer.mp4", user: "blaze_tv", verified: false, title: "Sintel - Epic Fantasy Trailer 🔥", music: "Epic Music - Blaze Mix", likes: "45K", comments: "1.8K", shares: "2.3K", desc: "The most intense and thrilling scenes." },
-      { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "fun_zone", verified: true, title: "Fun Times! 😄 Enjoy this joyful ride", music: "Happy Vibes - Fun Zone", likes: "67K", comments: "2.5K", shares: "3.1K", desc: "Spread joy and laughter." },
-      { src: "https://media.w3.org/2010/05/bunny/trailer.mp4", user: "meltdown_clips", verified: false, title: "Bunny Trailer - You won't believe 😱", music: "Dramatic Sound - Clips", likes: "98K", comments: "4.2K", shares: "6.7K", desc: "Watch the most unbelievable moments." }
+      { src: "https://media.w3.org/2010/05/sintel/trailer.mp4", user: "blaze_tv", verified: false, title: "Sintel - Epic Fantasy Trailer 🔥", music: "Epic Music - Blaze Mix", likes: "45K", comments: "1.8K", shares: "2.3K", desc: "The most intense and thrilling scenes." }
     ];
 
     const feed = document.getElementById('feed');
@@ -331,25 +338,14 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         const progressFill = item.querySelector('.progress-fill');
         let retryCount = 0;
 
-        video.addEventListener('loadeddata', () => {
-          loader.style.display = 'none';
-          retryCount = 0;
-        });
-        video.addEventListener('waiting', () => {
-          loader.style.display = 'flex';
-          loader.querySelector('.loader-text').textContent = 'Buffering...';
-        });
-        video.addEventListener('playing', () => {
-          loader.style.display = 'none';
-        });
+        video.addEventListener('loadeddata', () => { loader.style.display = 'none'; retryCount = 0; });
+        video.addEventListener('waiting', () => { loader.style.display = 'flex'; loader.querySelector('.loader-text').textContent = 'Buffering...'; });
+        video.addEventListener('playing', () => { loader.style.display = 'none'; });
         video.addEventListener('error', () => {
           retryCount++;
           if (retryCount <= 2) {
             loader.querySelector('.loader-text').textContent = `Retrying... (${retryCount}/2)`;
-            setTimeout(() => {
-              video.load();
-              video.play().catch(() => {});
-            }, 1500);
+            setTimeout(() => { video.load(); video.play().catch(() => {}); }, 1500);
           } else {
             loader.innerHTML = `<div style="color:#ff4444;font-size:14px;text-align:center;padding:20px">⚠️ Video unavailable<br><small>Swipe for next</small></div>`;
           }
@@ -385,12 +381,8 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
     function playVideoAt(idx) {
       document.querySelectorAll('.video-item video').forEach((v, i) => {
-        if (i === idx) { 
-          v.currentTime = 0; 
-          v.play().catch(() => {}); 
-        } else { 
-          v.pause(); 
-        }
+        if (i === idx) { v.currentTime = 0; v.play().catch(() => {}); } 
+        else { v.pause(); }
       });
       currentIndex = idx;
     }
@@ -439,35 +431,82 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       btn.textContent = speeds[speedIdx] + 'x';
     }
 
-    function openComments(i) {
-      alert(`💬 Comments for: "${videos[i].title}"\n\n✅ Feature working!`);
-    }
-
+    function openComments(i) { alert(`💬 Comments for: "${videos[i].title}"\n\n✅ Feature working!`); }
     function shareVideo(i) {
       const data = { title: videos[i].title, text: `Check out: ${videos[i].title}`, url: window.location.href };
-      if (navigator.share) {
-        navigator.share(data).catch(() => fallbackShare(data));
-      } else {
-        fallbackShare(data);
-      }
+      if (navigator.share) navigator.share(data).catch(() => fallbackShare(data));
+      else fallbackShare(data);
     }
     function fallbackShare(data) {
-      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => {
-        alert('🔗 Link copied to clipboard!');
-      }).catch(() => alert('📤 Share: ' + data.title));
+      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => alert('🔗 Link copied to clipboard!')).catch(() => alert('📤 Share: ' + data.title));
     }
 
-    // ===== ACTUAL FILE UPLOAD HANDLERS =====
+    // ==========================================
+    // ✅ REAL APPWRITE UPLOAD HANDLERS
+    // ==========================================
     function setupUploadHandlers() {
-      const handleFile = (e, source) => {
+      const handleFile = async (e, source) => {
         const file = e.target.files[0];
-        if (file) {
-          const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-          alert(`✅ ${source} Selected Successfully!\n\n📄 File: ${file.name}\n📦 Size: ${sizeMB} MB\n📂 Type: ${file.type}`);
+        if (!file) return;
+
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        alert(`⏳ Uploading ${source}...\n📄 File: ${file.name}\n📦 Size: ${sizeMB} MB\n\nPlease wait, do not close!`);
+        
+        try {
+          // 1. Upload File to Appwrite Storage
+          const fileResponse = await storage.createFile(
+            APPWRITE_CONFIG.bucketId,
+            ID.unique(),
+            file
+          );
+
+          // 2. Construct the direct view URL for the video
+          const videoUrl = `${APPWRITE_CONFIG.endpoint}/storage/buckets/${APPWRITE_CONFIG.bucketId}/files/${fileResponse.$id}/view?project=${APPWRITE_CONFIG.projectId}`;
+
+          // 3. Save Metadata to Appwrite Database
+          await databases.createDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            ID.unique(),
+            {
+              videoUrl: videoUrl,
+              title: file.name,
+              user: "sarwai_user",
+              likes: "0",
+              comments: "0",
+              shares: "0",
+              music: "Original Sound - You",
+              desc: "Newly uploaded video! 🎬"
+            }
+          );
+
+          alert(`✅ Upload Successful!\n\nVideo is now live on your feed.`);
+          
+          // 4. Add to local videos array and refresh feed instantly
+          const newVideo = {
+            src: videoUrl,
+            user: "sarwai_user",
+            verified: true,
+            title: file.name,
+            music: "Original Sound - You",
+            likes: "0",
+            comments: "0",
+            shares: "0",
+            desc: "Newly uploaded video! 🎬"
+          };
+          
+          videos.unshift(newVideo); // Add to top of feed
+          buildFeed(); // Rebuild feed to show new video
+          
           closeModal('uploadModal');
-          e.target.value = '';
+          e.target.value = ''; // Reset input
+
+        } catch (error) {
+          console.error("Upload failed:", error);
+          alert(`❌ Upload Failed!\n\nError: ${error.message}\n\nCheck Console (F12) for details.`);
         }
       };
+
       document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, '🎥 Camera'));
       document.getElementById('galleryInput').addEventListener('change', (e) => handleFile(e, '🖼️ Gallery'));
       document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
@@ -502,19 +541,11 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
     });
 
-    // ===== Extra Button Actions =====
-    document.querySelector('.edit-profile-btn')?.addEventListener('click', () => {
-      alert('✏️ Edit Profile\n\n✅ Feature working!');
-    });
-
+    document.querySelector('.edit-profile-btn')?.addEventListener('click', () => alert('✏️ Edit Profile\n\n✅ Feature working!'));
     document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const query = e.target.value.trim();
-        if (query) {
-          alert(`🔍 Searching for: "${query}"\n\n✅ Feature working!`);
-          e.target.value = '';
-          closeModal('discoverModal');
-        }
+        if (query) { alert(`🔍 Searching for: "${query}"\n\n✅ Feature working!`); e.target.value = ''; closeModal('discoverModal'); }
       }
     });
 
