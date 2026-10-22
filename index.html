@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <meta name="theme-color" content="#000" />
 <title>Sarwai One - Modern Video Platform</title>
+<!-- Appwrite Web SDK (Optional: Uncomment if you plan to use Appwrite JS functions) -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script> -->
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;width:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
@@ -253,314 +255,323 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 </div>
 
 <script>
-// ===== 100% Working Reliable Video URLs =====
-const videos = [
-  { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "animation_studio", verified: true, title: "Big Buck Bunny - A classic animated short film 🐰", music: "Original Sound - Animation Studio", likes: "125K", comments: "3.2K", shares: "8.5K", desc: "Follow the adventures of a giant rabbit." },
-  { src: "https://www.w3schools.com/html/movie.mp4", user: "nature_lover", verified: true, title: "Bear in the wild 🐻✨", music: "Nature Sounds - Wild", likes: "89K", comments: "2.1K", shares: "5.4K", desc: "A beautiful journey through the forest." },
-  { src: "https://media.w3.org/2010/05/sintel/trailer.mp4", user: "blaze_tv", verified: false, title: "Sintel - Epic Fantasy Trailer 🔥", music: "Epic Music - Blaze Mix", likes: "45K", comments: "1.8K", shares: "2.3K", desc: "The most intense and thrilling scenes." },
-  { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "fun_zone", verified: true, title: "Fun Times! 😄 Enjoy this joyful ride", music: "Happy Vibes - Fun Zone", likes: "67K", comments: "2.5K", shares: "3.1K", desc: "Spread joy and laughter." },
-  { src: "https://media.w3.org/2010/05/bunny/trailer.mp4", user: "meltdown_clips", verified: false, title: "Bunny Trailer - You won't believe 😱", music: "Dramatic Sound - Clips", likes: "98K", comments: "4.2K", shares: "6.7K", desc: "Watch the most unbelievable moments." }
-];
+    // ==========================================
+    // Appwrite Configuration (उचित जगह जोड़ा गया)
+    // ==========================================
+    const APPWRITE_CONFIG = {
+        endpoint: 'https://cloud.appwrite.io/v1',
+        projectId: '6aa2ebbf000296878b87',
+        databaseId: '6aa2ecdd0037d1cdddcd',
+        collectionId: '6aa2eea50010cef0903d',
+        bucketId: '6aa2f5a00028668aa537'
+    };
 
-const feed = document.getElementById('feed');
-let currentIndex = 0;
-let lastTapTime = 0;
+    // ===== 100% Working Reliable Video URLs =====
+    const videos = [
+      { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "animation_studio", verified: true, title: "Big Buck Bunny - A classic animated short film 🐰", music: "Original Sound - Animation Studio", likes: "125K", comments: "3.2K", shares: "8.5K", desc: "Follow the adventures of a giant rabbit." },
+      { src: "https://www.w3schools.com/html/movie.mp4", user: "nature_lover", verified: true, title: "Bear in the wild 🐻✨", music: "Nature Sounds - Wild", likes: "89K", comments: "2.1K", shares: "5.4K", desc: "A beautiful journey through the forest." },
+      { src: "https://media.w3.org/2010/05/sintel/trailer.mp4", user: "blaze_tv", verified: false, title: "Sintel - Epic Fantasy Trailer 🔥", music: "Epic Music - Blaze Mix", likes: "45K", comments: "1.8K", shares: "2.3K", desc: "The most intense and thrilling scenes." },
+      { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "fun_zone", verified: true, title: "Fun Times! 😄 Enjoy this joyful ride", music: "Happy Vibes - Fun Zone", likes: "67K", comments: "2.5K", shares: "3.1K", desc: "Spread joy and laughter." },
+      { src: "https://media.w3.org/2010/05/bunny/trailer.mp4", user: "meltdown_clips", verified: false, title: "Bunny Trailer - You won't believe 😱", music: "Dramatic Sound - Clips", likes: "98K", comments: "4.2K", shares: "6.7K", desc: "Watch the most unbelievable moments." }
+    ];
 
-// ===== Build Feed =====
-function buildFeed() {
-  feed.innerHTML = '';
-  videos.forEach((v, i) => {
-    const item = document.createElement('div');
-    item.className = 'video-item';
-    item.dataset.index = i;
-    // Added 'muted' initially because mobile browsers block autoplay without it. 
-    // User can unmute using the sound button.
-    item.innerHTML = `
-      <video src="${v.src}" loop playsinline webkit-playsinline preload="auto" muted></video>
-      <div class="loader"><div class="spinner"></div><div class="loader-text">Loading...</div></div>
-      <div class="overlay"></div>
-      <div class="cinematic-description">
-        <div class="cin-title">${v.title}</div>
-        <div class="cin-desc">${v.desc}</div>
-        <div class="cin-meta"><span class="cin-music-icon">🎵</span><span>${v.music}</span></div>
-      </div>
-      <button class="cinematic-exit" onclick="exitCinematic()">✕</button>
-      <div class="cinematic-hint">Tap to show/hide controls</div>
-      <div class="play-ind"><div class="ring">▶</div></div>
-      <div class="double-tap-heart">❤️</div>
-      <div class="progress-bar"><div class="progress-fill"></div></div>
-      <div class="v-controls">
-        <button class="v-fill-btn" onclick="toggleFill(this)">⛶ Fill</button>
-        <button class="speed-btn" onclick="cycleSpeed(this)">1x</button>
-      </div>
-      <div class="side-actions">
-        <div class="act" onclick="toggleLike(this)"><div class="ico">❤️</div><div class="count">${v.likes}</div></div>
-        <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${v.comments}</div></div>
-        <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${v.shares}</div></div>
-        <div class="act sound-off" onclick="toggleSound(this)"><div class="ico">🔇</div><div class="count">Sound</div></div>
-      </div>
-      <div class="bottom-info">
-        <div class="user">@${v.user} ${v.verified ? '<span class="verified">✓</span>' : ''}</div>
-        <div class="title">${v.title}</div>
-        <div class="music"><span class="music-icon">🎵</span>${v.music}</div>
-      </div>
-    `;
-    feed.appendChild(item);
-  });
-  setupVideoEvents();
-  setupProfileGrid();
-  playVideoAt(0);
-}
+    const feed = document.getElementById('feed');
+    let currentIndex = 0;
+    let lastTapTime = 0;
 
-// ===== Video Events with Auto-Retry =====
-function setupVideoEvents() {
-  document.querySelectorAll('.video-item').forEach((item, idx) => {
-    const video = item.querySelector('video');
-    const loader = item.querySelector('.loader');
-    const progressFill = item.querySelector('.progress-fill');
-    let retryCount = 0;
+    // ===== Build Feed =====
+    function buildFeed() {
+      feed.innerHTML = '';
+      videos.forEach((v, i) => {
+        const item = document.createElement('div');
+        item.className = 'video-item';
+        item.dataset.index = i;
+        item.innerHTML = `
+          <video src="${v.src}" loop playsinline webkit-playsinline preload="auto" muted></video>
+          <div class="loader"><div class="spinner"></div><div class="loader-text">Loading...</div></div>
+          <div class="overlay"></div>
+          <div class="cinematic-description">
+            <div class="cin-title">${v.title}</div>
+            <div class="cin-desc">${v.desc}</div>
+            <div class="cin-meta"><span class="cin-music-icon">🎵</span><span>${v.music}</span></div>
+          </div>
+          <button class="cinematic-exit" onclick="exitCinematic()">✕</button>
+          <div class="cinematic-hint">Tap to show/hide controls</div>
+          <div class="play-ind"><div class="ring">▶</div></div>
+          <div class="double-tap-heart">❤️</div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="v-controls">
+            <button class="v-fill-btn" onclick="toggleFill(this)">⛶ Fill</button>
+            <button class="speed-btn" onclick="cycleSpeed(this)">1x</button>
+          </div>
+          <div class="side-actions">
+            <div class="act" onclick="toggleLike(this)"><div class="ico">❤️</div><div class="count">${v.likes}</div></div>
+            <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${v.comments}</div></div>
+            <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${v.shares}</div></div>
+            <div class="act sound-off" onclick="toggleSound(this)"><div class="ico">🔇</div><div class="count">Sound</div></div>
+          </div>
+          <div class="bottom-info">
+            <div class="user">@${v.user} ${v.verified ? '<span class="verified">✓</span>' : ''}</div>
+            <div class="title">${v.title}</div>
+            <div class="music"><span class="music-icon">🎵</span>${v.music}</div>
+          </div>
+        `;
+        feed.appendChild(item);
+      });
+      setupVideoEvents();
+      setupProfileGrid();
+      playVideoAt(0);
+    }
 
-    video.addEventListener('loadeddata', () => {
-      loader.style.display = 'none';
-      retryCount = 0;
+    // ===== Video Events with Auto-Retry =====
+    function setupVideoEvents() {
+      document.querySelectorAll('.video-item').forEach((item, idx) => {
+        const video = item.querySelector('video');
+        const loader = item.querySelector('.loader');
+        const progressFill = item.querySelector('.progress-fill');
+        let retryCount = 0;
+
+        video.addEventListener('loadeddata', () => {
+          loader.style.display = 'none';
+          retryCount = 0;
+        });
+        video.addEventListener('waiting', () => {
+          loader.style.display = 'flex';
+          loader.querySelector('.loader-text').textContent = 'Buffering...';
+        });
+        video.addEventListener('playing', () => {
+          loader.style.display = 'none';
+        });
+        video.addEventListener('error', () => {
+          retryCount++;
+          if (retryCount <= 2) {
+            loader.querySelector('.loader-text').textContent = `Retrying... (${retryCount}/2)`;
+            setTimeout(() => {
+              video.load();
+              video.play().catch(() => {});
+            }, 1500);
+          } else {
+            loader.innerHTML = `<div style="color:#ff4444;font-size:14px;text-align:center;padding:20px">⚠️ Video unavailable<br><small>Swipe for next</small></div>`;
+          }
+        });
+        video.addEventListener('timeupdate', () => {
+          if (video.duration) progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
+        });
+
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.side-actions') || e.target.closest('.v-controls') || e.target.closest('.bottom-info') || e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
+          const now = Date.now();
+          if (now - lastTapTime < 300) {
+            const heart = item.querySelector('.double-tap-heart');
+            heart.classList.remove('show'); void heart.offsetWidth; heart.classList.add('show');
+            const likeBtn = item.querySelector('.side-actions .act');
+            if (!likeBtn.classList.contains('liked')) toggleLike(likeBtn);
+            lastTapTime = 0;
+          } else {
+            lastTapTime = now;
+            setTimeout(() => { if (Date.now() - lastTapTime >= 290) togglePlay(video, item); }, 300);
+          }
+        });
+      });
+    }
+
+    function togglePlay(video, item) {
+      const ind = item.querySelector('.play-ind .ring');
+      if (video.paused) { video.play(); ind.textContent = '▶'; } 
+      else { video.pause(); ind.textContent = '⏸'; }
+      item.querySelector('.play-ind').classList.add('show');
+      setTimeout(() => item.querySelector('.play-ind').classList.remove('show'), 500);
+    }
+
+    function playVideoAt(idx) {
+      document.querySelectorAll('.video-item video').forEach((v, i) => {
+        if (i === idx) { 
+          v.currentTime = 0; 
+          v.play().catch(() => {}); 
+        } else { 
+          v.pause(); 
+        }
+      });
+      currentIndex = idx;
+    }
+
+    let scrollTimer;
+    feed.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const idx = Math.round(feed.scrollTop / window.innerHeight);
+        if (idx !== currentIndex && idx >= 0 && idx < videos.length) playVideoAt(idx);
+      }, 100);
     });
-    video.addEventListener('waiting', () => {
-      loader.style.display = 'flex';
-      loader.querySelector('.loader-text').textContent = 'Buffering...';
-    });
-    video.addEventListener('playing', () => {
-      loader.style.display = 'none';
-    });
-    video.addEventListener('error', () => {
-      retryCount++;
-      if (retryCount <= 2) {
-        loader.querySelector('.loader-text').textContent = `Retrying... (${retryCount}/2)`;
-        setTimeout(() => {
-          video.load();
-          video.play().catch(() => {});
-        }, 1500);
+
+    // ===== Side Actions =====
+    function toggleLike(el) {
+      el.classList.toggle('liked');
+      const count = el.querySelector('.count');
+      const isLiked = el.classList.contains('liked');
+      el.querySelector('.ico').textContent = isLiked ? '❤️' : '🤍';
+      let num = parseFloat(count.textContent);
+      if (count.textContent.includes('K')) count.textContent = (isLiked ? num + 0.001 : num - 0.001).toFixed(1) + 'K';
+    }
+
+    function toggleSound(el) {
+      const video = document.querySelectorAll('.video-item video')[currentIndex];
+      if (el.classList.contains('sound-on')) {
+        el.classList.remove('sound-on'); el.classList.add('sound-off');
+        el.querySelector('.ico').textContent = '🔇'; video.muted = true;
       } else {
-        loader.innerHTML = `<div style="color:#ff4444;font-size:14px;text-align:center;padding:20px">⚠️ Video unavailable<br><small>Swipe for next</small></div>`;
+        el.classList.remove('sound-off'); el.classList.add('sound-on');
+        el.querySelector('.ico').textContent = '🔊'; video.muted = false;
+      }
+    }
+
+    function toggleFill(btn) {
+      const video = document.querySelectorAll('.video-item video')[currentIndex];
+      btn.classList.toggle('active'); video.classList.toggle('fit-cover');
+      btn.textContent = btn.classList.contains('active') ? '⛶ Contain' : '⛶ Fill';
+    }
+
+    const speeds = [1, 1.25, 1.5, 2, 0.75];
+    let speedIdx = 0;
+    function cycleSpeed(btn) {
+      speedIdx = (speedIdx + 1) % speeds.length;
+      document.querySelectorAll('.video-item video')[currentIndex].playbackRate = speeds[speedIdx];
+      btn.textContent = speeds[speedIdx] + 'x';
+    }
+
+    function openComments(i) {
+      alert(`💬 Comments for: "${videos[i].title}"\n\n✅ Feature working!`);
+    }
+
+    function shareVideo(i) {
+      const data = { title: videos[i].title, text: `Check out: ${videos[i].title}`, url: window.location.href };
+      if (navigator.share) {
+        navigator.share(data).catch(() => fallbackShare(data));
+      } else {
+        fallbackShare(data);
+      }
+    }
+    function fallbackShare(data) {
+      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => {
+        alert('🔗 Link copied to clipboard!');
+      }).catch(() => alert('📤 Share: ' + data.title));
+    }
+
+    // ===== ACTUAL FILE UPLOAD HANDLERS =====
+    function setupUploadHandlers() {
+      const handleFile = (e, source) => {
+        const file = e.target.files[0];
+        if (file) {
+          const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          alert(`✅ ${source} Selected Successfully!\n\n📄 File: ${file.name}\n📦 Size: ${sizeMB} MB\n📂 Type: ${file.type}`);
+          closeModal('uploadModal');
+          e.target.value = '';
+        }
+      };
+      document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, '🎥 Camera'));
+      document.getElementById('galleryInput').addEventListener('change', (e) => handleFile(e, '🖼️ Gallery'));
+      document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
+    }
+
+    // ===== Bottom Navigation =====
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const page = btn.dataset.page;
+        if (page === 'home') { document.getElementById('profilePage').classList.remove('open'); closeAllModals(); } 
+        else if (page === 'discover') openModal('discoverModal'); 
+        else if (page === 'upload') openModal('uploadModal'); 
+        else if (page === 'inbox') openModal('inboxModal'); 
+        else if (page === 'profile') document.getElementById('profilePage').classList.add('open');
+      });
+    });
+
+    document.querySelectorAll('.topbar .tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.topbar .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // ===== Modal Helpers =====
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); }
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
+    });
+
+    // ===== Extra Button Actions =====
+    document.querySelector('.edit-profile-btn')?.addEventListener('click', () => {
+      alert('✏️ Edit Profile\n\n✅ Feature working!');
+    });
+
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const query = e.target.value.trim();
+        if (query) {
+          alert(`🔍 Searching for: "${query}"\n\n✅ Feature working!`);
+          e.target.value = '';
+          closeModal('discoverModal');
+        }
       }
     });
-    video.addEventListener('timeupdate', () => {
-      if (video.duration) progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
+
+    // ===== Cinematic Mode =====
+    function enterCinematic() {
+      document.body.classList.add('cinematic-mode');
+      const hint = document.querySelector('.video-item .cinematic-hint');
+      if (hint) { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2000); }
+    }
+    function exitCinematic() {
+      document.body.classList.remove('cinematic-mode', 'controls-hidden', 'show-description', 'nav-hidden');
+    }
+    function checkOrientation() {
+      if (window.innerWidth > window.innerHeight && window.innerWidth > 700) enterCinematic();
+      else exitCinematic();
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
+
+    document.addEventListener('click', (e) => {
+      if (!document.body.classList.contains('cinematic-mode')) return;
+      if (e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
+      document.body.classList.toggle('controls-hidden');
+      document.body.classList.toggle('nav-hidden');
     });
 
-    item.addEventListener('click', (e) => {
-      if (e.target.closest('.side-actions') || e.target.closest('.v-controls') || e.target.closest('.bottom-info') || e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
-      const now = Date.now();
-      if (now - lastTapTime < 300) {
-        const heart = item.querySelector('.double-tap-heart');
-        heart.classList.remove('show'); void heart.offsetWidth; heart.classList.add('show');
-        const likeBtn = item.querySelector('.side-actions .act');
-        if (!likeBtn.classList.contains('liked')) toggleLike(likeBtn);
-        lastTapTime = 0;
-      } else {
-        lastTapTime = now;
-        setTimeout(() => { if (Date.now() - lastTapTime >= 290) togglePlay(video, item); }, 300);
-      }
+    let pressTimer;
+    document.addEventListener('touchstart', (e) => {
+      if (!document.body.classList.contains('cinematic-mode')) return;
+      pressTimer = setTimeout(() => document.body.classList.add('show-description'), 600);
     });
-  });
-}
+    document.addEventListener('touchend', () => {
+      clearTimeout(pressTimer);
+      document.body.classList.remove('show-description');
+    });
 
-function togglePlay(video, item) {
-  const ind = item.querySelector('.play-ind .ring');
-  if (video.paused) { video.play(); ind.textContent = '▶'; } 
-  else { video.pause(); ind.textContent = '⏸'; }
-  item.querySelector('.play-ind').classList.add('show');
-  setTimeout(() => item.querySelector('.play-ind').classList.remove('show'), 500);
-}
-
-function playVideoAt(idx) {
-  document.querySelectorAll('.video-item video').forEach((v, i) => {
-    if (i === idx) { 
-      v.currentTime = 0; 
-      v.play().catch(() => {}); 
-    } else { 
-      v.pause(); 
+    // ===== Profile Grid =====
+    function setupProfileGrid() {
+      const grid = document.getElementById('profileGrid');
+      grid.innerHTML = '';
+      videos.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        item.innerHTML = `<video src="${v.src}" muted preload="metadata"></video><div class="views">▶ ${v.likes}</div>`;
+        grid.appendChild(item);
+      });
     }
-  });
-  currentIndex = idx;
-}
 
-let scrollTimer;
-feed.addEventListener('scroll', () => {
-  clearTimeout(scrollTimer);
-  scrollTimer = setTimeout(() => {
-    const idx = Math.round(feed.scrollTop / window.innerHeight);
-    if (idx !== currentIndex && idx >= 0 && idx < videos.length) playVideoAt(idx);
-  }, 100);
-});
+    // ===== Init =====
+    buildFeed();
+    setupUploadHandlers();
+    checkOrientation();
 
-// ===== Side Actions =====
-function toggleLike(el) {
-  el.classList.toggle('liked');
-  const count = el.querySelector('.count');
-  const isLiked = el.classList.contains('liked');
-  el.querySelector('.ico').textContent = isLiked ? '❤️' : '🤍';
-  let num = parseFloat(count.textContent);
-  if (count.textContent.includes('K')) count.textContent = (isLiked ? num + 0.001 : num - 0.001).toFixed(1) + 'K';
-}
-
-function toggleSound(el) {
-  const video = document.querySelectorAll('.video-item video')[currentIndex];
-  if (el.classList.contains('sound-on')) {
-    el.classList.remove('sound-on'); el.classList.add('sound-off');
-    el.querySelector('.ico').textContent = '🔇'; video.muted = true;
-  } else {
-    el.classList.remove('sound-off'); el.classList.add('sound-on');
-    el.querySelector('.ico').textContent = '🔊'; video.muted = false;
-  }
-}
-
-function toggleFill(btn) {
-  const video = document.querySelectorAll('.video-item video')[currentIndex];
-  btn.classList.toggle('active'); video.classList.toggle('fit-cover');
-  btn.textContent = btn.classList.contains('active') ? '⛶ Contain' : '⛶ Fill';
-}
-
-const speeds = [1, 1.25, 1.5, 2, 0.75];
-let speedIdx = 0;
-function cycleSpeed(btn) {
-  speedIdx = (speedIdx + 1) % speeds.length;
-  document.querySelectorAll('.video-item video')[currentIndex].playbackRate = speeds[speedIdx];
-  btn.textContent = speeds[speedIdx] + 'x';
-}
-
-function openComments(i) {
-  alert(`💬 Comments for: "${videos[i].title}"\n\n✅ Feature working!`);
-}
-
-function shareVideo(i) {
-  const data = { title: videos[i].title, text: `Check out: ${videos[i].title}`, url: window.location.href };
-  if (navigator.share) {
-    navigator.share(data).catch(() => fallbackShare(data));
-  } else {
-    fallbackShare(data);
-  }
-}
-function fallbackShare(data) {
-  navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => {
-    alert('🔗 Link copied to clipboard!');
-  }).catch(() => alert('📤 Share: ' + data.title));
-}
-
-// ===== ACTUAL FILE UPLOAD HANDLERS =====
-function setupUploadHandlers() {
-  const handleFile = (e, source) => {
-    const file = e.target.files[0];
-    if (file) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      alert(`✅ ${source} Selected Successfully!\n\n📄 File: ${file.name}\n📦 Size: ${sizeMB} MB\n📂 Type: ${file.type}`);
-      closeModal('uploadModal');
-      e.target.value = '';
-    }
-  };
-  document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, '🎥 Camera'));
-  document.getElementById('galleryInput').addEventListener('change', (e) => handleFile(e, '🖼️ Gallery'));
-  document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
-}
-
-// ===== Bottom Navigation =====
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const page = btn.dataset.page;
-    if (page === 'home') { document.getElementById('profilePage').classList.remove('open'); closeAllModals(); } 
-    else if (page === 'discover') openModal('discoverModal'); 
-    else if (page === 'upload') openModal('uploadModal'); 
-    else if (page === 'inbox') openModal('inboxModal'); 
-    else if (page === 'profile') document.getElementById('profilePage').classList.add('open');
-  });
-});
-
-document.querySelectorAll('.topbar .tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.topbar .tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-
-// ===== Modal Helpers =====
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); }
-document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
-});
-
-// ===== Extra Button Actions =====
-document.querySelector('.edit-profile-btn')?.addEventListener('click', () => {
-  alert('✏️ Edit Profile\n\n✅ Feature working!');
-});
-
-document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    const query = e.target.value.trim();
-    if (query) {
-      alert(`🔍 Searching for: "${query}"\n\n✅ Feature working!`);
-      e.target.value = '';
-      closeModal('discoverModal');
-    }
-  }
-});
-
-// ===== Cinematic Mode =====
-function enterCinematic() {
-  document.body.classList.add('cinematic-mode');
-  const hint = document.querySelector('.video-item .cinematic-hint');
-  if (hint) { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2000); }
-}
-function exitCinematic() {
-  document.body.classList.remove('cinematic-mode', 'controls-hidden', 'show-description', 'nav-hidden');
-}
-function checkOrientation() {
-  if (window.innerWidth > window.innerHeight && window.innerWidth > 700) enterCinematic();
-  else exitCinematic();
-}
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
-
-document.addEventListener('click', (e) => {
-  if (!document.body.classList.contains('cinematic-mode')) return;
-  if (e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
-  document.body.classList.toggle('controls-hidden');
-  document.body.classList.toggle('nav-hidden');
-});
-
-let pressTimer;
-document.addEventListener('touchstart', (e) => {
-  if (!document.body.classList.contains('cinematic-mode')) return;
-  pressTimer = setTimeout(() => document.body.classList.add('show-description'), 600);
-});
-document.addEventListener('touchend', () => {
-  clearTimeout(pressTimer);
-  document.body.classList.remove('show-description');
-});
-
-// ===== Profile Grid =====
-function setupProfileGrid() {
-  const grid = document.getElementById('profileGrid');
-  grid.innerHTML = '';
-  videos.forEach(v => {
-    const item = document.createElement('div');
-    item.className = 'grid-item';
-    item.innerHTML = `<video src="${v.src}" muted preload="metadata"></video><div class="views">▶ ${v.likes}</div>`;
-    grid.appendChild(item);
-  });
-}
-
-// ===== Init =====
-buildFeed();
-setupUploadHandlers();
-checkOrientation();
-
-document.body.addEventListener('touchmove', (e) => {
-  if (e.target.closest('.feed') || e.target.closest('.sheet') || e.target.closest('.profile-page')) return;
-  e.preventDefault();
-}, { passive: false });
+    document.body.addEventListener('touchmove', (e) => {
+      if (e.target.closest('.feed') || e.target.closest('.sheet') || e.target.closest('.profile-page')) return;
+      e.preventDefault();
+    }, { passive: false });
 </script>
 </body>
 </html>
