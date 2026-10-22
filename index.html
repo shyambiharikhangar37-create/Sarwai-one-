@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="viewport" content=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <meta name="theme-color" content="#000" />
 <title>Sarwai One - Modern Video Platform</title>
 <!-- ✅ Appwrite Web SDK (Ab Active Hai) -->
@@ -267,7 +267,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     };
 
     // Initialize Appwrite SDK
-    const { Client, Databases, Storage, ID } = Appwrite;
+    const { Client, Databases, Storage, ID, Query } = Appwrite;
     const client = new Client()
         .setEndpoint(APPWRITE_CONFIG.endpoint)
         .setProject(APPWRITE_CONFIG.projectId);
@@ -275,12 +275,8 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     const databases = new Databases(client);
     const storage = new Storage(client);
 
-    // ===== 100% Working Reliable Video URLs =====
-    const videos = [
-      { src: "https://www.w3schools.com/html/mov_bbb.mp4", user: "animation_studio", verified: true, title: "Big Buck Bunny - A classic animated short film 🐰", music: "Original Sound - Animation Studio", likes: "125K", comments: "3.2K", shares: "8.5K", desc: "Follow the adventures of a giant rabbit." },
-      { src: "https://www.w3schools.com/html/movie.mp4", user: "nature_lover", verified: true, title: "Bear in the wild 🐻✨", music: "Nature Sounds - Wild", likes: "89K", comments: "2.1K", shares: "5.4K", desc: "A beautiful journey through the forest." },
-      { src: "https://media.w3.org/2010/05/sintel/trailer.mp4", user: "blaze_tv", verified: false, title: "Sintel - Epic Fantasy Trailer 🔥", music: "Epic Music - Blaze Mix", likes: "45K", comments: "1.8K", shares: "2.3K", desc: "The most intense and thrilling scenes." }
-    ];
+    // Dynamic Videos Array (Fetch from Appwrite)
+    let videos = [];
 
     const feed = document.getElementById('feed');
     let currentIndex = 0;
@@ -289,6 +285,14 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     // ===== Build Feed =====
     function buildFeed() {
       feed.innerHTML = '';
+      
+      // Empty State Message
+      if (videos.length === 0) {
+        feed.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;padding:20px;text-align:center;"><div style="font-size:64px;margin-bottom:20px;">📭</div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">No videos yet!</div><div style="font-size:14px;opacity:.7;max-width:260px;line-height:1.4;">Tap the <b style="color:#ff2d55">+</b> button below to upload your first original video.</div></div>';
+        setupProfileGrid();
+        return;
+      }
+
       videos.forEach((v, i) => {
         const item = document.createElement('div');
         item.className = 'video-item';
@@ -328,6 +332,34 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       setupVideoEvents();
       setupProfileGrid();
       playVideoAt(0);
+    }
+
+    // ===== Fetch Videos from Appwrite Database =====
+    async function fetchVideos() {
+        try {
+            const response = await databases.listDocuments(
+                APPWRITE_CONFIG.databaseId,
+                APPWRITE_CONFIG.collectionId,
+                [Query.limit(100)] // Fetch up to 100 original videos
+            );
+            
+            videos = response.documents.map(doc => ({
+                src: doc.videoUrl,
+                user: doc.user || "sarwai_user",
+                verified: true,
+                title: doc.title || "Untitled Video",
+                music: doc.music || "Original Sound",
+                likes: doc.likes || "0",
+                comments: doc.comments || "0",
+                shares: doc.shares || "0",
+                desc: doc.desc || ""
+            }));
+            
+            buildFeed();
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+            buildFeed(); 
+        }
     }
 
     // ===== Video Events with Auto-Retry =====
@@ -586,6 +618,10 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     function setupProfileGrid() {
       const grid = document.getElementById('profileGrid');
       grid.innerHTML = '';
+      if (videos.length === 0) {
+        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">No videos uploaded yet.</div>';
+        return;
+      }
       videos.forEach(v => {
         const item = document.createElement('div');
         item.className = 'grid-item';
@@ -595,7 +631,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     }
 
     // ===== Init =====
-    buildFeed();
+    fetchVideos(); // Replaces buildFeed() -> Fetches original videos first
     setupUploadHandlers();
     checkOrientation();
 
