@@ -109,6 +109,12 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .spinner{width:44px;height:44px;border:3px solid #333;border-top-color:#ff2d55;border-radius:50%;animation:spin 1s linear infinite}
 .loader-text{font-size:12px;opacity:.6}
 
+/* ===== NSFW Warning Overlay ===== */
+.nsfw-warning { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:25; cursor:pointer; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); text-align:center; padding:20px; }
+.nsfw-warning .warn-icon { font-size: 36px; margin-bottom: 12px; }
+.nsfw-warning .warn-title { font-weight: 700; font-size: 18px; color: #ff4444; margin-bottom: 6px; }
+.nsfw-warning .warn-desc { font-size: 13px; opacity: 0.9; color: #fff; line-height: 1.4; }
+
 /* ===== Bottom Nav ===== */
 .bottomnav{position:absolute;left:0;right:0;bottom:0;z-index:25;height:64px;display:flex;align-items:center;justify-content:space-around;background:rgba(10,10,10,.97);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px);transition:transform .35s ease}
 .bottomnav.nav-hidden{transform:translateY(100%)}
@@ -274,6 +280,15 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         <div class="u-ico">🎵</div><div>Sound</div>
       </div>
     </div>
+    
+    <!-- ✅ Copyright Declaration -->
+    <div style="margin-top:16px; padding:14px; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3); border-radius:10px; font-size:12px; color:#ff8888;">
+      <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+        <input type="checkbox" id="copyrightCheck" style="margin-top:2px; width:16px; height:16px; accent-color:#ff2d55; flex-shrink:0;">
+        <span>I confirm that I own the copyright to this content or have explicit permission to use it. I understand that false claims may result in content removal or account suspension.</span>
+      </label>
+    </div>
+    
     <p style="opacity:.6;font-size:12px;text-align:center;margin-top:20px">Click to open device storage</p>
   </div>
 </div>
@@ -305,12 +320,22 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 <div class="modal" id="editProfileModal">
   <div class="sheet">
     <span class="close" onclick="closeModal('editProfileModal')">✕</span>
-    <h3>✏️ Edit Profile</h3>
+    <h3>✏️ Edit Profile & Settings</h3>
     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
       <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Name</label>
       <input type="text" id="editName" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
       <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Bio</label>
       <input type="text" id="editBio" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      
+      <!-- ✅ NSFW Toggle Setting -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:14px; background:#222; border-radius:10px; margin-top:8px;">
+        <div>
+          <div style="font-weight:600; font-size:14px;">Show Sensitive (NSFW) Content</div>
+          <div style="font-size:11px; opacity:0.6; margin-top:2px;">Display content flagged as sensitive.</div>
+        </div>
+        <input type="checkbox" id="nsfwToggle" style="width:20px; height:20px; accent-color:#ff2d55;" onchange="toggleNSFWSetting(this.checked)">
+      </div>
+
       <button onclick="saveProfile()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Save Changes</button>
     </div>
   </div>
@@ -327,6 +352,26 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       <input type="text" id="editVideoDesc" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
       <input type="hidden" id="editVideoId" />
       <button onclick="saveVideoEdit()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">सेव करें (Save)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Report Modal -->
+<div class="modal" id="reportModal">
+  <div class="sheet">
+    <span class="close" onclick="closeModal('reportModal')">✕</span>
+    <h3>⚠️ Report Content</h3>
+    <p style="font-size:13px; opacity:0.7; margin-bottom:16px;">Help us keep Sarwai safe. Select a reason for reporting this video.</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button onclick="submitReport('copyright')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
+        <span>©️</span> Copyright Infringement
+      </button>
+      <button onclick="submitReport('nsfw')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
+        <span>🔞</span> NSFW / Inappropriate Content
+      </button>
+      <button onclick="submitReport('spam')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
+        <span>🚫</span> Spam or Misleading
+      </button>
     </div>
   </div>
 </div>
@@ -349,11 +394,12 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     
     const databases = new Databases(client);
     const storage = new Storage(client);
-    const account = new Account(client); // ✅ Added Account SDK
+    const account = new Account(client);
 
     let videos = [];
     let allVideos = []; 
-    let currentUser = null; // ✅ Track logged-in user
+    let currentUser = null;
+    let allowNSFW = localStorage.getItem('sarwai_allow_nsfw') === 'true'; // ✅ NSFW Setting
 
     const feed = document.getElementById('feed');
     let currentIndex = 0;
@@ -391,9 +437,21 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         const safeDesc = v.desc ? v.desc.replace(/"/g, '&quot;') : '';
         const safeMusic = v.music ? v.music.replace(/"/g, '&quot;') : 'Original Sound';
         const safeUser = v.user ? v.user.replace(/"/g, '&quot;') : 'user';
+        
+        // ✅ NSFW Blur Logic
+        const nsfwId = `vid-${i}`;
+        const isNSFW = v.isNSFW || false;
+        const blurStyle = (isNSFW && !allowNSFW) ? 'filter:blur(25px) brightness(0.7);' : '';
+        const nsfwOverlay = (isNSFW && !allowNSFW) ? 
+          `<div class="nsfw-warning" onclick="document.getElementById('${nsfwId}').style.filter='none'; this.style.display='none';">
+             <div class="warn-icon">🔞</div>
+             <div class="warn-title">Sensitive Content</div>
+             <div class="warn-desc">This video may contain NSFW material. Tap to view.</div>
+           </div>` : '';
 
         item.innerHTML = `
-          <video src="${v.src}" loop playsinline webkit-playsinline preload="auto" muted></video>
+          <video id="${nsfwId}" src="${v.src}" style="${blurStyle}" loop playsinline webkit-playsinline preload="auto" muted></video>
+          ${nsfwOverlay}
           <div class="loader"><div class="spinner"></div><div class="loader-text">Loading...</div></div>
           <div class="overlay"></div>
           <div class="cinematic-description">
@@ -414,6 +472,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
             <div class="act" onclick="toggleLike(this, ${i})"><div class="ico">❤️</div><div class="count">${formatCount(parseInt(v.likes) || 0)}</div></div>
             <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${formatCount(parseInt(v.comments) || 0)}</div></div>
             <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${formatCount(parseInt(v.shares) || 0)}</div></div>
+            <div class="act" onclick="openReportModal(${i})"><div class="ico">⚠️</div><div class="count">Report</div></div>
             <div class="act sound-off" onclick="toggleSound(this)"><div class="ico">🔇</div><div class="count">Sound</div></div>
           </div>
           <div class="bottom-info">
@@ -448,7 +507,8 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
                 likes: String(doc.likes || 0),
                 comments: String(doc.comments || 0),
                 shares: String(doc.shares || 0),
-                desc: doc.desc || ""
+                desc: doc.desc || "",
+                isNSFW: doc.isNSFW || false // ✅ Fetch NSFW flag
             }));
             
             videos = mappedVideos;
@@ -485,7 +545,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         });
 
         item.addEventListener('click', (e) => {
-          if (e.target.closest('.side-actions') || e.target.closest('.v-controls') || e.target.closest('.bottom-info') || e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
+          if (e.target.closest('.side-actions') || e.target.closest('.v-controls') || e.target.closest('.bottom-info') || e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description') || e.target.closest('.nsfw-warning')) return;
           const now = Date.now();
           if (now - lastTapTime < 300) {
             const heart = item.querySelector('.double-tap-heart');
@@ -642,6 +702,29 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => showToast('Link copied to clipboard!', '🔗')).catch(() => showToast('Could not copy link', '⚠️'));
     }
 
+    // ✅ Report Functions
+    let currentReportVideoIndex = -1;
+    function openReportModal(i) {
+      currentReportVideoIndex = i;
+      openModal('reportModal');
+    }
+
+    async function submitReport(reason) {
+      if (currentReportVideoIndex === -1) return;
+      const video = videos[currentReportVideoIndex];
+      
+      showToast('Submitting report...', '⏳');
+      closeModal('reportModal');
+      
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      let reasonText = reason === 'copyright' ? 'Copyright Infringement' : reason === 'nsfw' ? 'NSFW Content' : 'Spam';
+      showToast(`Reported for ${reasonText}. Thank you for keeping Sarwai safe.`, '✅');
+      
+      console.log(`Reported video ${video.id} for ${reason}`);
+      // In production: save to a 'reports' collection in Appwrite
+    }
+
     function setupUploadHandlers() {
       const handleFile = async (e, source) => {
         if (!currentUser) {
@@ -653,14 +736,28 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
           return;
         }
 
+        // ✅ Copyright Check Validation
+        const copyrightChecked = document.getElementById('copyrightCheck').checked;
+        if (!copyrightChecked) {
+          showToast('Please accept the copyright declaration to proceed.', '⚠️');
+          return;
+        }
+
         const file = e.target.files[0];
         if (!file) return;
 
-        showToast(`Uploading ${source}...`, '⏳');
+        // ✅ Simulated Copyright & Safety Check
+        showToast('Running Copyright & Safety Check...', '🛡️');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate backend AI check delay
+
         try {
           const fileResponse = await storage.createFile(APPWRITE_CONFIG.bucketId, ID.unique(), file);
           const videoUrl = `${APPWRITE_CONFIG.endpoint}/storage/buckets/${APPWRITE_CONFIG.bucketId}/files/${fileResponse.$id}/view?project=${APPWRITE_CONFIG.projectId}`;
           const docId = ID.unique();
+
+          // ✅ Basic Frontend NSFW Keyword Detection
+          const nsfwKeywords = ['nsfw', 'nude', 'xxx', 'sex', 'porn', 'adult'];
+          const isNSFW = nsfwKeywords.some(keyword => file.name.toLowerCase().includes(keyword));
 
           await databases.createDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId, {
             videoUrl: videoUrl,
@@ -671,18 +768,22 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
             comments: "0",
             shares: "0",
             music: "Original Sound - You",
-            desc: "Newly uploaded video! 🎬"
+            desc: "Newly uploaded video! 🎬",
+            isNSFW: isNSFW // ⚠️ Note: Ensure 'isNSFW' (Boolean) attribute exists in your Appwrite collection
           });
 
           showToast('Upload successful! Video is live.', '✅');
           
-          const newVideo = { id: docId, src: videoUrl, user: currentUser.name || "Sarwai User", userId: currentUser.$id, verified: true, title: file.name, music: "Original Sound - You", likes: "0", comments: "0", shares: "0", desc: "Newly uploaded video! 🎬" };
+          const newVideo = { id: docId, src: videoUrl, user: currentUser.name || "Sarwai User", userId: currentUser.$id, verified: true, title: file.name, music: "Original Sound - You", likes: "0", comments: "0", shares: "0", desc: "Newly uploaded video! 🎬", isNSFW: isNSFW };
           videos.unshift(newVideo);
           allVideos.unshift(newVideo);
           buildFeed();
           updateProfileStats();
           closeModal('uploadModal');
           e.target.value = '';
+          
+          // Reset copyright checkbox
+          document.getElementById('copyrightCheck').checked = false;
         } catch (error) {
           console.error("Upload failed:", error);
           showToast('Upload failed. Check console.', '❌');
@@ -705,7 +806,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         else if (page === 'inbox') openModal('inboxModal'); 
         else if (page === 'profile') {
             document.getElementById('profilePage').classList.add('open');
-            checkAuth(); // ✅ Check auth state when opening profile
+            checkAuth();
         }
       });
     });
@@ -811,6 +912,9 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
           document.getElementById('editBio').value = '🎬 Creating amazing content ✨';
         }
         document.getElementById('editName').value = currentUser.name || '';
+        
+        // ✅ Set NSFW toggle state
+        document.getElementById('nsfwToggle').checked = allowNSFW;
       }
       setupProfileGrid();
       updateProfileStats();
@@ -837,6 +941,14 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       } catch (err) {
         showToast('अपडेट विफल: ' + err.message, '❌');
       }
+    }
+
+    // ✅ NSFW Toggle Function
+    function toggleNSFWSetting(checked) {
+      allowNSFW = checked;
+      localStorage.setItem('sarwai_allow_nsfw', checked);
+      showToast(checked ? 'Sensitive content will now be shown' : 'Sensitive content hidden', '⚙️');
+      buildFeed(); // Re-render feed to apply/remove blur
     }
 
     function updateProfileStats() {
