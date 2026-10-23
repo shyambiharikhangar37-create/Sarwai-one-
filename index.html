@@ -2,10 +2,10 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <meta name="theme-color" content="#000" />
-<title>Sarwai One - Modern Video Platform</title>
-<!-- ✅ Appwrite Web SDK (Ab Active Hai) -->
+<title>Sarwai - Modern Video Platform</title>
+<!-- ✅ Appwrite Web SDK -->
 <script src="https://cdn.jsdelivr.net/npm/appwrite@15.0.0"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -13,6 +13,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000;color:#fff;font
 button{background:none;border:none;color:inherit;cursor:pointer;font:inherit}
 input,textarea{font:inherit;outline:none;border:none}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
+
+/* ===== Toast Notification ===== */
+#toast {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-150%);
+  background: rgba(30, 30, 30, 0.95); color: #fff; padding: 12px 24px; border-radius: 30px;
+  font-size: 14px; font-weight: 600; z-index: 99999; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
 
 /* ===== Cinematic Mode ===== */
 body.cinematic-mode #app{position:fixed;inset:0;z-index:9999;background:#000}
@@ -41,17 +52,16 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .cinematic-hint.show{opacity:1}
 
 /* ===== Topbar ===== */
-.topbar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,rgba(0,0,0,.9),transparent);pointer-events:none}
-.topbar .logo-container{display:flex;align-items:center;gap:8px;pointer-events:auto}
-.sarwai-logo{width:34px;height:35px;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.4);flex-shrink:0}
-.sarwai-logo .red-part{height:45%;background:#D32F2F;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box}
-.sarwai-logo .red-part span{color:#fff;font-weight:900;font-size:7.5px;letter-spacing:.5px;line-height:1;text-transform:uppercase}
-.sarwai-logo .blue-part{height:55%;background:#1565C0;display:flex;align-items:center;justify-content:center}
-.sarwai-logo .play-icon{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:8px solid #fff;margin-left:2px}
-.topbar .one-text{font-size:20px;font-weight:900;background:linear-gradient(90deg,#ff0000,#ff2d55,#0044ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px}
-.topbar .tabs{display:flex;gap:20px;pointer-events:auto}
-.topbar .tab-btn{font-size:15px;font-weight:600;opacity:.6;transition:opacity .2s}
-.topbar .tab-btn.active{opacity:1}
+.topbar { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 36px; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 0; background: #666666; pointer-events: none; }
+.topbar .logo-container { display: flex; align-items: center; height: 100%; pointer-events: auto; }
+.new-logo { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,.4); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); position: relative; }
+.new-logo .part-saffron { flex: 1; background: #FF9933; }
+.new-logo .part-lightblue { flex: 1; background: #00BFFF; }
+.new-logo .logo-shape { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; background: rgba(255, 255, 255, 0.95); border-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.new-logo .logo-shape span { color: #000000; font-weight: 900; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1; }
+.topbar .tabs{display:flex;gap:20px;pointer-events:auto;height:100%;align-items:center;padding-right:12px;}
+.topbar .tab-btn{font-size:14px;font-weight:600;opacity:.8;transition:opacity .2s;color:#fff;}
+.topbar .tab-btn.active{opacity:1;font-weight:800;}
 
 /* ===== Feed & Video ===== */
 .feed{flex:1;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none}
@@ -152,20 +162,18 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 </head>
 <body>
 
-<!-- Hidden File Inputs for Actual Device Storage Access -->
 <input type="file" id="cameraInput" accept="video/*" capture="environment" style="display:none">
 <input type="file" id="galleryInput" accept="video/*,image/*" style="display:none">
 <input type="file" id="soundInput" accept="audio/*" style="display:none">
 
 <div id="app">
-  <!-- Top Bar -->
   <div class="topbar">
     <div class="logo-container">
-      <div class="sarwai-logo">
-        <div class="red-part"><span>S</span></div>
-        <div class="blue-part"><div class="play-icon"></div></div>
+      <div class="new-logo">
+        <div class="part-saffron"></div>
+        <div class="part-lightblue"></div>
+        <div class="logo-shape"><span>S1</span></div>
       </div>
-      <span class="one-text">ONE</span>
     </div>
     <div class="tabs">
       <button class="tab-btn" data-tab="following">Following</button>
@@ -173,10 +181,8 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     </div>
   </div>
 
-  <!-- Video Feed -->
   <div class="feed" id="feed"></div>
 
-  <!-- Bottom Navigation -->
   <div class="bottomnav" id="bottomnav">
     <button class="nav-btn active" data-page="home"><span class="n-ico">🏠</span><span>Home</span></button>
     <button class="nav-btn" data-page="discover"><span class="n-ico">🔍</span><span>Discover</span></button>
@@ -186,24 +192,56 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
-<!-- Profile Page -->
 <div class="profile-page" id="profilePage">
-  <div class="profile-header">
-    <div class="profile-avatar">S</div>
-    <div class="profile-name">Sarwai User</div>
-    <div class="profile-handle">@sarwai_user</div>
-    <div class="profile-stats">
-      <div class="stat"><div class="stat-num">128</div><div class="stat-label">Following</div></div>
-      <div class="stat"><div class="stat-num">12.5K</div><div class="stat-label">Followers</div></div>
-      <div class="stat"><div class="stat-num">89.2K</div><div class="stat-label">Likes</div></div>
+  <!-- Logged Out View -->
+  <div id="authView" style="display:none; flex-direction:column; height:100%; padding:24px; overflow-y:auto;">
+    <div style="text-align:center; margin-bottom:30px; margin-top:40px;">
+      <div class="new-logo" style="width:64px; height:64px; margin:0 auto 16px;">
+        <div class="part-saffron"></div>
+        <div class="part-lightblue"></div>
+        <div class="logo-shape"><span>S1</span></div>
+      </div>
+      <h2 style="font-size:24px; font-weight:700; color:#fff;">Welcome to Sarwai</h2>
+      <p style="opacity:0.7; font-size:14px; margin-top:8px; color:#fff;">Login to upload, like, and manage your profile.</p>
     </div>
-    <div class="profile-bio">🎬 Creating amazing content ✨ | Welcome to Sarwai One</div>
-    <button class="edit-profile-btn">Edit Profile</button>
+    
+    <div style="display:flex; gap:8px; margin-bottom:24px; background:#222; padding:4px; border-radius:12px;">
+      <button id="tabLogin" class="tab active" style="flex:1; text-align:center; border-radius:8px; padding:10px;" onclick="switchAuthTab('login')">Login</button>
+      <button id="tabRegister" class="tab" style="flex:1; text-align:center; border-radius:8px; padding:10px;" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <form id="authForm" onsubmit="handleAuth(event)" style="display:flex; flex-direction:column; gap:16px;">
+      <input type="text" id="authName" placeholder="Full Name" style="display:none; background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <input type="email" id="authEmail" placeholder="Email Address" required style="background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <input type="password" id="authPassword" placeholder="Password (min 8 chars)" required minlength="8" style="background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      
+      <button type="submit" id="authSubmitBtn" style="background:#ff2d55; color:#fff; padding:14px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer; margin-top:10px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Login</button>
+    </form>
+    <div id="authError" style="color:#ff4444; font-size:13px; text-align:center; margin-top:10px; display:none;"></div>
   </div>
-  <div class="profile-grid" id="profileGrid"></div>
+
+  <!-- Logged In View -->
+  <div id="profileView" style="display:none; flex-direction:column; overflow-y:auto; height:100%;">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">S</div>
+      <div class="profile-name" id="profileName">Sarwai User</div>
+      <div class="profile-handle" id="profileHandle">@user</div>
+      <div class="profile-stats">
+        <div class="stat"><div class="stat-num" id="statFollowing">0</div><div class="stat-label">Following</div></div>
+        <div class="stat"><div class="stat-num" id="statFollowers">0</div><div class="stat-label">Followers</div></div>
+        <div class="stat"><div class="stat-num" id="statLikes">0</div><div class="stat-label">Likes</div></div>
+      </div>
+      <div class="profile-bio" id="profileBio">🎬 Creating amazing content ✨</div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:14px;">
+        <button class="edit-profile-btn" onclick="openModal('editProfileModal')">Edit Profile</button>
+        <button class="edit-profile-btn" style="background:#ff4444; color:#fff;" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <div class="profile-grid" id="profileGrid"></div>
+  </div>
 </div>
 
-<!-- Discover Modal -->
+<!-- Modals -->
 <div class="modal" id="discoverModal">
   <div class="sheet">
     <span class="close" onclick="closeModal('discoverModal')">✕</span>
@@ -221,7 +259,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
-<!-- Upload Modal -->
 <div class="modal" id="uploadModal">
   <div class="sheet">
     <span class="close" onclick="closeModal('uploadModal')">✕</span>
@@ -241,7 +278,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
-<!-- Inbox Modal -->
 <div class="modal" id="inboxModal">
   <div class="sheet">
     <span class="close" onclick="closeModal('inboxModal')">✕</span>
@@ -254,10 +290,50 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
+<div class="modal" id="commentsModal">
+  <div class="sheet" style="max-height: 70vh;">
+    <span class="close" onclick="closeModal('commentsModal')">✕</span>
+    <h3>💬 Comments</h3>
+    <div id="commentsList" style="padding: 10px 0; opacity: 0.7; text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; font-size: 14px;">No comments yet. Be the first!</div>
+    <div style="display: flex; gap: 8px; margin-top: 12px;">
+      <input type="text" id="commentInput" placeholder="Add a comment..." style="flex: 1; background: #222; color: #fff; padding: 12px 14px; border-radius: 20px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <button onclick="postComment()" style="background: #ff2d55; color: #fff; padding: 12px 16px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">Post</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editProfileModal">
+  <div class="sheet">
+    <span class="close" onclick="closeModal('editProfileModal')">✕</span>
+    <h3>✏️ Edit Profile</h3>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Name</label>
+      <input type="text" id="editName" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Bio</label>
+      <input type="text" id="editBio" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <button onclick="saveProfile()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editVideoModal">
+  <div class="sheet">
+    <span class="close" onclick="closeModal('editVideoModal')">✕</span>
+    <h3>✏️ वीडियो एडिट करें</h3>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Title (शीर्षक)</label>
+      <input type="text" id="editVideoTitle" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Description (विवरण)</label>
+      <input type="text" id="editVideoDesc" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
+      <input type="hidden" id="editVideoId" />
+      <button onclick="saveVideoEdit()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">सेव करें (Save)</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-    // ==========================================
-    // ✅ Appwrite Configuration & Initialization
-    // ==========================================
     const APPWRITE_CONFIG = {
         endpoint: 'https://cloud.appwrite.io/v1',
         projectId: '6aa2ebbf000296878b87',
@@ -266,27 +342,40 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         bucketId: '6aa2f5a00028668aa537'
     };
 
-    // Initialize Appwrite SDK
-    const { Client, Databases, Storage, ID, Query } = Appwrite;
+    const { Client, Databases, Storage, ID, Query, Account } = Appwrite;
     const client = new Client()
         .setEndpoint(APPWRITE_CONFIG.endpoint)
         .setProject(APPWRITE_CONFIG.projectId);
     
     const databases = new Databases(client);
     const storage = new Storage(client);
+    const account = new Account(client); // ✅ Added Account SDK
 
-    // Dynamic Videos Array (Fetch from Appwrite)
     let videos = [];
+    let allVideos = []; 
+    let currentUser = null; // ✅ Track logged-in user
 
     const feed = document.getElementById('feed');
     let currentIndex = 0;
     let lastTapTime = 0;
 
-    // ===== Build Feed =====
+    function showToast(message, icon = 'ℹ️') {
+      const toast = document.getElementById('toast');
+      toast.innerHTML = `<span style="font-size: 18px;">${icon}</span><span>${message}</span>`;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function formatCount(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return num.toString();
+    }
+
     function buildFeed() {
       feed.innerHTML = '';
-      
-      // Empty State Message
       if (videos.length === 0) {
         feed.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;padding:20px;text-align:center;"><div style="font-size:64px;margin-bottom:20px;">📭</div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">No videos yet!</div><div style="font-size:14px;opacity:.7;max-width:260px;line-height:1.4;">Tap the <b style="color:#ff2d55">+</b> button below to upload your first original video.</div></div>';
         setupProfileGrid();
@@ -297,14 +386,20 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         const item = document.createElement('div');
         item.className = 'video-item';
         item.dataset.index = i;
+        
+        const safeTitle = v.title ? v.title.replace(/"/g, '&quot;') : 'Untitled';
+        const safeDesc = v.desc ? v.desc.replace(/"/g, '&quot;') : '';
+        const safeMusic = v.music ? v.music.replace(/"/g, '&quot;') : 'Original Sound';
+        const safeUser = v.user ? v.user.replace(/"/g, '&quot;') : 'user';
+
         item.innerHTML = `
           <video src="${v.src}" loop playsinline webkit-playsinline preload="auto" muted></video>
           <div class="loader"><div class="spinner"></div><div class="loader-text">Loading...</div></div>
           <div class="overlay"></div>
           <div class="cinematic-description">
-            <div class="cin-title">${v.title}</div>
-            <div class="cin-desc">${v.desc}</div>
-            <div class="cin-meta"><span class="cin-music-icon">🎵</span><span>${v.music}</span></div>
+            <div class="cin-title">${safeTitle}</div>
+            <div class="cin-desc">${safeDesc}</div>
+            <div class="cin-meta"><span class="cin-music-icon">🎵</span><span>${safeMusic}</span></div>
           </div>
           <button class="cinematic-exit" onclick="exitCinematic()">✕</button>
           <div class="cinematic-hint">Tap to show/hide controls</div>
@@ -316,15 +411,15 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
             <button class="speed-btn" onclick="cycleSpeed(this)">1x</button>
           </div>
           <div class="side-actions">
-            <div class="act" onclick="toggleLike(this)"><div class="ico">❤️</div><div class="count">${v.likes}</div></div>
-            <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${v.comments}</div></div>
-            <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${v.shares}</div></div>
+            <div class="act" onclick="toggleLike(this, ${i})"><div class="ico">❤️</div><div class="count">${formatCount(parseInt(v.likes) || 0)}</div></div>
+            <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${formatCount(parseInt(v.comments) || 0)}</div></div>
+            <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${formatCount(parseInt(v.shares) || 0)}</div></div>
             <div class="act sound-off" onclick="toggleSound(this)"><div class="ico">🔇</div><div class="count">Sound</div></div>
           </div>
           <div class="bottom-info">
-            <div class="user">@${v.user} ${v.verified ? '<span class="verified">✓</span>' : ''}</div>
-            <div class="title">${v.title}</div>
-            <div class="music"><span class="music-icon">🎵</span>${v.music}</div>
+            <div class="user">@${safeUser} ${v.verified ? '<span class="verified">✓</span>' : ''}</div>
+            <div class="title">${safeTitle}</div>
+            <div class="music"><span class="music-icon">🎵</span>${safeMusic}</div>
           </div>
         `;
         feed.appendChild(item);
@@ -334,35 +429,38 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       playVideoAt(0);
     }
 
-    // ===== Fetch Videos from Appwrite Database =====
     async function fetchVideos() {
         try {
             const response = await databases.listDocuments(
                 APPWRITE_CONFIG.databaseId,
                 APPWRITE_CONFIG.collectionId,
-                [Query.limit(100)] // Fetch up to 100 original videos
+                [Query.limit(100)]
             );
             
-            videos = response.documents.map(doc => ({
+            const mappedVideos = response.documents.map(doc => ({
+                id: doc.$id,
                 src: doc.videoUrl,
                 user: doc.user || "sarwai_user",
+                userId: doc.userId || "guest",
                 verified: true,
                 title: doc.title || "Untitled Video",
                 music: doc.music || "Original Sound",
-                likes: doc.likes || "0",
-                comments: doc.comments || "0",
-                shares: doc.shares || "0",
+                likes: String(doc.likes || 0),
+                comments: String(doc.comments || 0),
+                shares: String(doc.shares || 0),
                 desc: doc.desc || ""
             }));
             
+            videos = mappedVideos;
+            allVideos = [...mappedVideos];
             buildFeed();
+            updateProfileStats();
         } catch (error) {
             console.error("Error fetching videos:", error);
             buildFeed(); 
         }
     }
 
-    // ===== Video Events with Auto-Retry =====
     function setupVideoEvents() {
       document.querySelectorAll('.video-item').forEach((item, idx) => {
         const video = item.querySelector('video');
@@ -393,7 +491,10 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
             const heart = item.querySelector('.double-tap-heart');
             heart.classList.remove('show'); void heart.offsetWidth; heart.classList.add('show');
             const likeBtn = item.querySelector('.side-actions .act');
-            if (!likeBtn.classList.contains('liked')) toggleLike(likeBtn);
+            if (!likeBtn.classList.contains('liked')) {
+                const index = parseInt(item.dataset.index);
+                toggleLike(likeBtn, index);
+            }
             lastTapTime = 0;
           } else {
             lastTapTime = now;
@@ -428,14 +529,26 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       }, 100);
     });
 
-    // ===== Side Actions =====
-    function toggleLike(el) {
+    async function toggleLike(el, index) {
       el.classList.toggle('liked');
-      const count = el.querySelector('.count');
+      const countEl = el.querySelector('.count');
       const isLiked = el.classList.contains('liked');
       el.querySelector('.ico').textContent = isLiked ? '❤️' : '🤍';
-      let num = parseFloat(count.textContent);
-      if (count.textContent.includes('K')) count.textContent = (isLiked ? num + 0.001 : num - 0.001).toFixed(1) + 'K';
+      
+      let currentLikes = parseInt(videos[index].likes) || 0;
+      if (isLiked) currentLikes++;
+      else currentLikes = Math.max(0, currentLikes - 1);
+      
+      videos[index].likes = currentLikes.toString();
+      countEl.textContent = formatCount(currentLikes);
+
+      if (videos[index].id) {
+        try {
+          await databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[index].id, { likes: currentLikes.toString() });
+        } catch (err) {
+          console.error("Failed to update like in DB:", err);
+        }
+      }
     }
 
     function toggleSound(el) {
@@ -463,79 +576,116 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       btn.textContent = speeds[speedIdx] + 'x';
     }
 
-    function openComments(i) { alert(`💬 Comments for: "${videos[i].title}"\n\n✅ Feature working!`); }
-    function shareVideo(i) {
+    let currentCommentVideoIndex = -1;
+    function openComments(i) {
+      currentCommentVideoIndex = i;
+      const list = document.getElementById('commentsList');
+      list.innerHTML = `<div style="padding: 20px; text-align: center; opacity: 0.7;">No comments yet for this video. Be the first!</div>`;
+      openModal('commentsModal');
+    }
+
+    async function postComment() {
+      const input = document.getElementById('commentInput');
+      if (input.value.trim() && currentCommentVideoIndex !== -1) {
+        const list = document.getElementById('commentsList');
+        if (list.innerText.includes('No comments yet')) list.innerHTML = '';
+        
+        const newComment = document.createElement('div');
+        newComment.style.cssText = 'padding: 12px; border-bottom: 1px solid #333; text-align: left; animation: fade 0.3s;';
+        const commenterName = currentUser ? currentUser.name : 'guest_user';
+        newComment.innerHTML = `<div style="font-weight: 600; font-size: 13px; margin-bottom: 4px; color: #fff;">@${commenterName}</div><div style="font-size: 14px; color: #ddd;">${input.value}</div>`;
+        list.prepend(newComment);
+        input.value = '';
+        showToast('Comment posted!', '💬');
+
+        let currentComments = parseInt(videos[currentCommentVideoIndex].comments) || 0;
+        currentComments++;
+        videos[currentCommentVideoIndex].comments = currentComments.toString();
+        
+        const videoItem = document.querySelector(`.video-item[data-index="${currentCommentVideoIndex}"]`);
+        if (videoItem) {
+          const commentCountEl = videoItem.querySelector('.side-actions .act:nth-child(2) .count');
+          if (commentCountEl) commentCountEl.textContent = formatCount(currentComments);
+        }
+
+        if (videos[currentCommentVideoIndex].id) {
+          try {
+            await databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[currentCommentVideoIndex].id, { comments: currentComments.toString() });
+          } catch (err) {
+            console.error("Failed to update comment in DB:", err);
+          }
+        }
+      }
+    }
+
+    async function shareVideo(i) {
       const data = { title: videos[i].title, text: `Check out: ${videos[i].title}`, url: window.location.href };
+      let currentShares = parseInt(videos[i].shares) || 0;
+      currentShares++;
+      videos[i].shares = currentShares.toString();
+      
+      const videoItem = document.querySelector(`.video-item[data-index="${i}"]`);
+      if (videoItem) {
+        const shareCountEl = videoItem.querySelector('.side-actions .act:nth-child(3) .count');
+        if (shareCountEl) shareCountEl.textContent = formatCount(currentShares);
+      }
+
+      if (videos[i].id) {
+        databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[i].id, { shares: currentShares.toString() }).catch(err => console.error("Failed to update share in DB:", err));
+      }
+
       if (navigator.share) navigator.share(data).catch(() => fallbackShare(data));
       else fallbackShare(data);
     }
+    
     function fallbackShare(data) {
-      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => alert('🔗 Link copied to clipboard!')).catch(() => alert('📤 Share: ' + data.title));
+      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => showToast('Link copied to clipboard!', '🔗')).catch(() => showToast('Could not copy link', '⚠️'));
     }
 
-    // ==========================================
-    // ✅ REAL APPWRITE UPLOAD HANDLERS
-    // ==========================================
     function setupUploadHandlers() {
       const handleFile = async (e, source) => {
+        if (!currentUser) {
+          showToast('Please login to upload videos!', '⚠️');
+          closeModal('uploadModal');
+          document.getElementById('profilePage').classList.add('open');
+          checkAuth();
+          e.target.value = '';
+          return;
+        }
+
         const file = e.target.files[0];
         if (!file) return;
 
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        alert(`⏳ Uploading ${source}...\n📄 File: ${file.name}\n📦 Size: ${sizeMB} MB\n\nPlease wait, do not close!`);
-        
+        showToast(`Uploading ${source}...`, '⏳');
         try {
-          // 1. Upload File to Appwrite Storage
-          const fileResponse = await storage.createFile(
-            APPWRITE_CONFIG.bucketId,
-            ID.unique(),
-            file
-          );
-
-          // 2. Construct the direct view URL for the video
+          const fileResponse = await storage.createFile(APPWRITE_CONFIG.bucketId, ID.unique(), file);
           const videoUrl = `${APPWRITE_CONFIG.endpoint}/storage/buckets/${APPWRITE_CONFIG.bucketId}/files/${fileResponse.$id}/view?project=${APPWRITE_CONFIG.projectId}`;
+          const docId = ID.unique();
 
-          // 3. Save Metadata to Appwrite Database
-          await databases.createDocument(
-            APPWRITE_CONFIG.databaseId,
-            APPWRITE_CONFIG.collectionId,
-            ID.unique(),
-            {
-              videoUrl: videoUrl,
-              title: file.name,
-              user: "sarwai_user",
-              likes: "0",
-              comments: "0",
-              shares: "0",
-              music: "Original Sound - You",
-              desc: "Newly uploaded video! 🎬"
-            }
-          );
-
-          alert(`✅ Upload Successful!\n\nVideo is now live on your feed.`);
-          
-          // 4. Add to local videos array and refresh feed instantly
-          const newVideo = {
-            src: videoUrl,
-            user: "sarwai_user",
-            verified: true,
+          await databases.createDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId, {
+            videoUrl: videoUrl,
             title: file.name,
-            music: "Original Sound - You",
+            user: currentUser.name || "Sarwai User",
+            userId: currentUser.$id,
             likes: "0",
             comments: "0",
             shares: "0",
+            music: "Original Sound - You",
             desc: "Newly uploaded video! 🎬"
-          };
-          
-          videos.unshift(newVideo); // Add to top of feed
-          buildFeed(); // Rebuild feed to show new video
-          
-          closeModal('uploadModal');
-          e.target.value = ''; // Reset input
+          });
 
+          showToast('Upload successful! Video is live.', '✅');
+          
+          const newVideo = { id: docId, src: videoUrl, user: currentUser.name || "Sarwai User", userId: currentUser.$id, verified: true, title: file.name, music: "Original Sound - You", likes: "0", comments: "0", shares: "0", desc: "Newly uploaded video! 🎬" };
+          videos.unshift(newVideo);
+          allVideos.unshift(newVideo);
+          buildFeed();
+          updateProfileStats();
+          closeModal('uploadModal');
+          e.target.value = '';
         } catch (error) {
           console.error("Upload failed:", error);
-          alert(`❌ Upload Failed!\n\nError: ${error.message}\n\nCheck Console (F12) for details.`);
+          showToast('Upload failed. Check console.', '❌');
         }
       };
 
@@ -544,7 +694,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
     }
 
-    // ===== Bottom Navigation =====
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -554,7 +703,10 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         else if (page === 'discover') openModal('discoverModal'); 
         else if (page === 'upload') openModal('uploadModal'); 
         else if (page === 'inbox') openModal('inboxModal'); 
-        else if (page === 'profile') document.getElementById('profilePage').classList.add('open');
+        else if (page === 'profile') {
+            document.getElementById('profilePage').classList.add('open');
+            checkAuth(); // ✅ Check auth state when opening profile
+        }
       });
     });
 
@@ -565,7 +717,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       });
     });
 
-    // ===== Modal Helpers =====
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
     function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); }
@@ -573,15 +724,297 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
     });
 
-    document.querySelector('.edit-profile-btn')?.addEventListener('click', () => alert('✏️ Edit Profile\n\n✅ Feature working!'));
+    // ===== ✅ AUTHENTICATION FUNCTIONS =====
+    async function checkAuth() {
+      try {
+        currentUser = await account.get();
+        showProfileView();
+      } catch (e) {
+        currentUser = null;
+        showAuthView();
+      }
+    }
+
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+      document.getElementById('authName').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('authSubmitBtn').textContent = isLogin ? 'Login' : 'Create Account';
+      document.getElementById('authError').style.display = 'none';
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const isLogin = document.getElementById('tabLogin').classList.contains('active');
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value;
+      const errorDiv = document.getElementById('authError');
+      
+      errorDiv.style.display = 'none';
+      const submitBtn = document.getElementById('authSubmitBtn');
+      submitBtn.textContent = 'Processing...';
+      submitBtn.disabled = true;
+
+      try {
+        if (isLogin) {
+          await account.createEmailPasswordSession(email, password);
+        } else {
+          await account.create(ID.unique(), email, password, name);
+          await account.createEmailPasswordSession(email, password);
+        }
+        await checkAuth();
+        showToast(isLogin ? 'Welcome back!' : 'Account created successfully!', '✅');
+      } catch (err) {
+        errorDiv.textContent = err.message || 'Authentication failed';
+        errorDiv.style.display = 'block';
+      } finally {
+        submitBtn.textContent = isLogin ? 'Login' : 'Create Account';
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function logout() {
+      try {
+        await account.deleteSession('current');
+        currentUser = null;
+        showAuthView();
+        showToast('Logged out successfully', '👋');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function showAuthView() {
+      document.getElementById('authView').style.display = 'flex';
+      document.getElementById('profileView').style.display = 'none';
+      document.getElementById('profileGrid').innerHTML = '';
+    }
+
+    function showProfileView() {
+      document.getElementById('authView').style.display = 'none';
+      document.getElementById('profileView').style.display = 'flex';
+      
+      if (currentUser) {
+        document.getElementById('profileName').textContent = currentUser.name || 'User';
+        const handle = currentUser.name ? '@' + currentUser.name.toLowerCase().replace(/\s+/g, '_') : '@user';
+        document.getElementById('profileHandle').textContent = handle;
+        document.getElementById('profileAvatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+        
+        const savedBio = localStorage.getItem(`sarwai_bio_${currentUser.$id}`);
+        if (savedBio) {
+          document.getElementById('profileBio').textContent = savedBio;
+          document.getElementById('editBio').value = savedBio;
+        } else {
+          document.getElementById('profileBio').textContent = '🎬 Creating amazing content ✨';
+          document.getElementById('editBio').value = '🎬 Creating amazing content ✨';
+        }
+        document.getElementById('editName').value = currentUser.name || '';
+      }
+      setupProfileGrid();
+      updateProfileStats();
+    }
+
+    async function saveProfile() {
+      if (!currentUser) {
+        showToast('Please login first', '⚠️');
+        return;
+      }
+      const name = document.getElementById('editName').value;
+      const bio = document.getElementById('editBio').value;
+      
+      try {
+        if (name.trim()) {
+          await account.updateName(name);
+          currentUser.name = name;
+        }
+        localStorage.setItem(`sarwai_bio_${currentUser.$id}`, bio || '');
+        
+        showProfileView();
+        closeModal('editProfileModal');
+        showToast('प्रोफ़ाइल अपडेट हो गई!', '✅');
+      } catch (err) {
+        showToast('अपडेट विफल: ' + err.message, '❌');
+      }
+    }
+
+    function updateProfileStats() {
+      if (!currentUser) return;
+      const userVideos = videos.filter(v => v.userId === currentUser.$id);
+      const totalLikes = userVideos.reduce((sum, v) => sum + (parseInt(v.likes) || 0), 0);
+      document.getElementById('statLikes').textContent = formatCount(totalLikes);
+    }
+
+    function openEditVideoModal(docId) {
+      const video = videos.find(v => v.id === docId);
+      if (!video) {
+        showToast('वीडियो डेटा नहीं मिला', '⚠️');
+        return;
+      }
+      if (currentUser && video.userId !== currentUser.$id) {
+        showToast('You can only edit your own videos', '⚠️');
+        return;
+      }
+      document.getElementById('editVideoId').value = docId;
+      document.getElementById('editVideoTitle').value = video.title || '';
+      document.getElementById('editVideoDesc').value = video.desc || '';
+      openModal('editVideoModal');
+    }
+
+    async function saveVideoEdit() {
+      if (!currentUser) {
+        showToast('Please login first', '⚠️');
+        return;
+      }
+      const docId = document.getElementById('editVideoId').value;
+      const newTitle = document.getElementById('editVideoTitle').value;
+      const newDesc = document.getElementById('editVideoDesc').value;
+      const video = videos.find(v => v.id === docId);
+
+      if (!docId || !video) {
+        showToast('वीडियो ID नहीं मिली', '❌');
+        return;
+      }
+      if (video.userId !== currentUser.$id) {
+        showToast('You can only edit your own videos', '⚠️');
+        return;
+      }
+
+      try {
+        await databases.updateDocument(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          docId,
+          { title: newTitle, desc: newDesc }
+        );
+
+        video.title = newTitle;
+        video.desc = newDesc;
+        
+        buildFeed();
+        setupProfileGrid();
+        closeModal('editVideoModal');
+        showToast('वीडियो सफलतापूर्वक अपडेट हो गया!', '✅');
+      } catch (error) {
+        console.error("Update failed:", error);
+        showToast(`वीडियो अपडेट करने में विफल: ${error.message}`, '❌');
+      }
+    }
+
+    async function deleteVideo(docId, fileUrl) {
+      if (!currentUser) {
+        showToast('Please login to delete videos', '⚠️');
+        return;
+      }
+      const video = videos.find(v => v.id === docId);
+      if (video && video.userId !== currentUser.$id) {
+        showToast('You can only delete your own videos', '⚠️');
+        return;
+      }
+      if (!confirm('क्या आप वाकई इस वीडियो को हटाना चाहते हैं? यह एक्शन वापस नहीं लिया जा सकता।')) return;
+      
+      showToast('वीडियो हटाया जा रहा है...', '⏳');
+      try {
+        await databases.deleteDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId);
+        
+        if (fileUrl) {
+          const fileIdMatch = fileUrl.match(/\/files\/([^\/\?]+)/);
+          if (fileIdMatch && fileIdMatch[1]) {
+            await storage.deleteFile(APPWRITE_CONFIG.bucketId, fileIdMatch[1]).catch(() => {});
+          }
+        }
+
+        videos = videos.filter(v => v.id !== docId);
+        allVideos = allVideos.filter(v => v.id !== docId);
+        
+        buildFeed();
+        setupProfileGrid();
+        updateProfileStats();
+        showToast('वीडियो सफलतापूर्वक हटा दिया गया', '✅');
+      } catch (error) {
+        console.error("Delete failed:", error);
+        showToast(`वीडियो हटाने में विफल: ${error.message}`, '❌');
+      }
+    }
+
+    function setupProfileGrid() {
+      const grid = document.getElementById('profileGrid');
+      grid.innerHTML = '';
+      
+      if (!currentUser) {
+        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">Please login to view your profile.</div>';
+        return;
+      }
+      
+      const userVideos = videos.filter(v => v.userId === currentUser.$id);
+      
+      if (!userVideos || userVideos.length === 0) {
+        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">अभी तक कोई वीडियो अपलोड नहीं किया गया।</div>';
+        return;
+      }
+      
+      userVideos.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        item.dataset.id = v.id || '';
+        
+        item.innerHTML = `
+          <video src="${v.src || ''}" muted preload="metadata"></video>
+          <div class="views">▶ ${formatCount(parseInt(v.likes) || 0)}</div>
+          <div class="video-actions" style="position:absolute;top:6px;right:6px;display:flex;gap:6px;z-index:5;">
+            <button class="edit-video-btn" style="background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;backdrop-filter:blur(4px);cursor:pointer;" title="Edit">✏️</button>
+            <button class="delete-video-btn" style="background:rgba(0,0,0,0.6);color:#ff4444;border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;backdrop-filter:blur(4px);cursor:pointer;" title="Delete">🗑️</button>
+          </div>
+        `;
+        grid.appendChild(item);
+      });
+
+      grid.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-video-btn');
+        const deleteBtn = e.target.closest('.delete-video-btn');
+        const gridItem = e.target.closest('.grid-item');
+        
+        if (!gridItem) return;
+        const docId = gridItem.dataset.id;
+        const video = videos.find(v => v.id === docId);
+        
+        if (!video) {
+          showToast('वीडियो डेटा नहीं मिला', '⚠️');
+          return;
+        }
+
+        if (editBtn) {
+          openEditVideoModal(docId);
+        } else if (deleteBtn) {
+          deleteVideo(docId, video.src);
+        }
+      });
+    }
+
     document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const query = e.target.value.trim();
-        if (query) { alert(`🔍 Searching for: "${query}"\n\n✅ Feature working!`); e.target.value = ''; closeModal('discoverModal'); }
+        if (query) {
+          showToast(`Searching for "${query}"...`, '🔍');
+          e.target.value = '';
+          closeModal('discoverModal');
+          
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          document.querySelector('.nav-btn[data-page="home"]').classList.add('active');
+          document.getElementById('profilePage').classList.remove('open');
+
+          setTimeout(() => {
+            const filtered = allVideos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()) || v.user.toLowerCase().includes(query.toLowerCase()));
+            videos = filtered;
+            buildFeed();
+            if (filtered.length > 0) showToast(`Found ${filtered.length} results`, '✅');
+            else showToast(`No results found`, '⚠️');
+          }, 600);
+        }
       }
     });
 
-    // ===== Cinematic Mode =====
     function enterCinematic() {
       document.body.classList.add('cinematic-mode');
       const hint = document.querySelector('.video-item .cinematic-hint');
@@ -614,26 +1047,14 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       document.body.classList.remove('show-description');
     });
 
-    // ===== Profile Grid =====
-    function setupProfileGrid() {
-      const grid = document.getElementById('profileGrid');
-      grid.innerHTML = '';
-      if (videos.length === 0) {
-        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">No videos uploaded yet.</div>';
-        return;
-      }
-      videos.forEach(v => {
-        const item = document.createElement('div');
-        item.className = 'grid-item';
-        item.innerHTML = `<video src="${v.src}" muted preload="metadata"></video><div class="views">▶ ${v.likes}</div>`;
-        grid.appendChild(item);
-      });
-    }
-
     // ===== Init =====
-    fetchVideos(); // Replaces buildFeed() -> Fetches original videos first
-    setupUploadHandlers();
-    checkOrientation();
+    async function initApp() {
+      await checkAuth();
+      fetchVideos();
+      setupUploadHandlers();
+      checkOrientation();
+    }
+    initApp();
 
     document.body.addEventListener('touchmove', (e) => {
       if (e.target.closest('.feed') || e.target.closest('.sheet') || e.target.closest('.profile-page')) return;
