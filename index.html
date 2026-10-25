@@ -5,17 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#000" />
 <title>Sarwai - Modern Video Platform</title>
-<!-- ✅ Appwrite Web SDK -->
 <script src="https://cdn.jsdelivr.net/npm/appwrite@15.0.0"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-/* ✅ FIX: 100dvh for better mobile keyboard handling */
 html,body{height:100dvh;width:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 button{background:none;border:none;color:inherit;cursor:pointer;font:inherit}
 input,textarea{font:inherit;outline:none;border:none}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
 
-/* ===== Toast Notification ===== */
 #toast {
   position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-150%);
   background: rgba(30, 30, 30, 0.95); color: #fff; padding: 12px 24px; border-radius: 30px;
@@ -26,7 +23,6 @@ input,textarea{font:inherit;outline:none;border:none}
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ===== Cinematic Mode ===== */
 body.cinematic-mode #app{position:fixed;inset:0;z-index:9999;background:#000}
 body.cinematic-mode .feed{overflow:hidden}
 body.cinematic-mode .video-item{position:fixed;inset:0;width:100vw;height:100vh;z-index:10000}
@@ -52,7 +48,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .cinematic-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);padding:12px 20px;border-radius:24px;font-size:13px;color:#fff;opacity:0;pointer-events:none;z-index:25;backdrop-filter:blur(10px);transition:opacity .4s;border:1px solid rgba(255,255,255,.15)}
 .cinematic-hint.show{opacity:1}
 
-/* ===== Topbar ===== */
 .topbar { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 36px; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 0; background: #666666; pointer-events: none; }
 .topbar .logo-container { display: flex; align-items: center; height: 100%; pointer-events: auto; }
 .new-logo { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,.4); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); position: relative; }
@@ -64,7 +59,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .topbar .tab-btn{font-size:14px;font-weight:600;opacity:.8;transition:opacity .2s;color:#fff;}
 .topbar .tab-btn.active{opacity:1;font-weight:800;}
 
-/* ===== Feed & Video ===== */
 .feed{flex:1;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none}
 .feed::-webkit-scrollbar{display:none}
 .video-item{position:relative;width:100%;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;background:#000}
@@ -110,13 +104,11 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .spinner{width:44px;height:44px;border:3px solid #333;border-top-color:#ff2d55;border-radius:50%;animation:spin 1s linear infinite}
 .loader-text{font-size:12px;opacity:.6}
 
-/* ===== NSFW Warning Overlay ===== */
 .nsfw-warning { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:25; cursor:pointer; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); text-align:center; padding:20px; }
 .nsfw-warning .warn-icon { font-size: 36px; margin-bottom: 12px; }
 .nsfw-warning .warn-title { font-weight: 700; font-size: 18px; color: #ff4444; margin-bottom: 6px; }
 .nsfw-warning .warn-desc { font-size: 13px; opacity: 0.9; color: #fff; line-height: 1.4; }
 
-/* ===== Bottom Nav ===== */
 .bottomnav{position:absolute;left:0;right:0;bottom:0;z-index:25;height:64px;display:flex;align-items:center;justify-content:space-around;background:rgba(10,10,10,.97);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px);transition:transform .35s ease}
 .bottomnav.nav-hidden{transform:translateY(100%)}
 .nav-btn{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;opacity:.7;cursor:pointer}
@@ -128,11 +120,9 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .nav-btn.upload .n-ico::after{transform:translateX(4px)}
 .nav-btn.upload .n-ico span{position:relative;z-index:2;font-size:18px;color:#000;font-weight:900}
 
-/* ===== Modal ===== */
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
 .modal.open{display:flex;animation:fade .2s}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-/* ✅ FIX: Better padding and dvh for keyboard */
 .sheet{width:100%;max-width:500px;background:#141414;border-radius:18px 18px 0 0;padding:18px;padding-bottom: 30px;max-height:80dvh;overflow-y:auto;animation:slide .25s}
 @keyframes slide{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet h3{margin-bottom:14px;font-size:17px}
@@ -149,12 +139,10 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 .upload-opt:active{transform:scale(.95)}
 .upload-opt .u-ico{font-size:34px}
 
-/* ✅ NEW: Upload Progress Modal Styles */
 .upload-progress-container { width: 100%; background: #333; height: 8px; border-radius: 4px; margin: 20px 0; overflow: hidden; }
 .upload-progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff2d55, #ff9500); transition: width 0.3s ease; border-radius: 4px; }
 .upload-status-text { font-size: 14px; opacity: 0.8; margin-bottom: 10px; font-weight: 500; }
 
-/* Profile Page */
 .profile-page{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;overflow-y:auto}
 .profile-page.open{display:flex}
 .profile-header{padding:20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.1)}
@@ -201,12 +189,11 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     <button class="nav-btn" data-page="discover"><span class="n-ico">🔍</span><span>Discover</span></button>
     <button class="nav-btn upload" data-page="upload"><span class="n-ico"><span>+</span></span><span></span></button>
     <button class="nav-btn" data-page="inbox"><span class="n-ico">💬</span><span>Inbox</span></button>
-    <button class="nav-btn" data-page="profile"><span class="n-ico">👤</span><span>Profile</span></button>
+    <button class="nav-btn" data-page="profile"><span class="n-ico"></span><span>Profile</span></button>
   </div>
 </div>
 
 <div class="profile-page" id="profilePage">
-  <!-- Logged Out View -->
   <div id="authView" style="display:none; flex-direction:column; height:100%; padding:24px; overflow-y:auto;">
     <div style="text-align:center; margin-bottom:30px; margin-top:40px;">
       <div class="new-logo" style="width:64px; height:64px; margin:0 auto 16px;">
@@ -233,7 +220,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     <div id="authError" style="color:#ff4444; font-size:13px; text-align:center; margin-top:10px; display:none;"></div>
   </div>
 
-  <!-- Logged In View -->
   <div id="profileView" style="display:none; flex-direction:column; overflow-y:auto; height:100%;">
     <div class="profile-header">
       <div class="profile-avatar" id="profileAvatar">S</div>
@@ -254,11 +240,10 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
-<!-- Modals -->
 <div class="modal" id="discoverModal">
   <div class="sheet">
-    <span class="close" onclick="closeModal('discoverModal')">✕</span>
-    <h3>🔍 Discover</h3>
+    <span class="close" onclick="closeModal('discoverModal')"></span>
+    <h3> Discover</h3>
     <div class="search-box"><input type="text" id="searchInput" placeholder="Search videos, users, sounds..." /></div>
     <div class="tabs">
       <div class="tab active">Trending</div>
@@ -297,7 +282,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
   </div>
 </div>
 
-<!-- ✅ NEW: Upload Progress Modal -->
 <div class="modal" id="uploadProgressModal">
   <div class="sheet" style="text-align: center; max-height: 250px; padding-bottom: 30px;">
     <span class="close" onclick="cancelUpload()">✕</span>
@@ -337,7 +321,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 <div class="modal" id="editProfileModal">
   <div class="sheet">
     <span class="close" onclick="closeModal('editProfileModal')">✕</span>
-    <h3>✏️ Edit Profile & Settings</h3>
+    <h3>️ Edit Profile & Settings</h3>
     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
       <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Name</label>
       <input type="text" id="editName" class="keyboard-focus-input" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
@@ -398,8 +382,8 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         endpoint: 'https://cloud.appwrite.io/v1',
         projectId: '6aa2ebbf000296878b87',
         databaseId: '6aa2ecdd0037d1cdddcd',
-        collectionId: '6aa2eea50010cef0903d',
-        bucketId: '6aa2f5a00028668aa537'
+        tableId: '6adbc1f200025b2558ca',
+        bucketId: '6aa2f5a00028668aa537',
     };
 
     const { Client, Databases, Storage, ID, Query, Account } = Appwrite;
@@ -420,7 +404,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
     let currentIndex = 0;
     let lastTapTime = 0;
     
-    // ✅ Upload Progress Variables
     let isUploading = false;
     let uploadProgressInterval = null;
 
@@ -508,25 +491,25 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
     async function fetchVideos() {
         try {
-            const response = await databases.listDocuments(
+            const response = await databases.listRows(
                 APPWRITE_CONFIG.databaseId,
-                APPWRITE_CONFIG.collectionId,
+                APPWRITE_CONFIG.tableId,
                 [Query.limit(100)]
             );
             
-            const mappedVideos = response.documents.map(doc => ({
-                id: doc.$id,
-                src: doc.videoUrl,
-                user: doc.user || "sarwai_user",
-                userId: doc.userId || "guest",
+            const mappedVideos = response.rows.map(row => ({
+                id: row.$id,
+                src: row.videoUrl,
+                user: row.user || "sarwai_user",
+                userId: row.userId || "guest",
                 verified: true,
-                title: doc.title || "Untitled Video",
-                music: doc.music || "Original Sound",
-                likes: String(doc.likes || 0),
-                comments: String(doc.comments || 0),
-                shares: String(doc.shares || 0),
-                desc: doc.desc || "",
-                isNSFW: doc.isNSFW || false
+                title: row.title || "Untitled Video",
+                music: row.music || "Original Sound",
+                likes: String(row.likes || 0),
+                comments: String(row.comments || 0),
+                shares: String(row.shares || 0),
+                desc: row.desc || "",
+                isNSFW: row.isNSFW || false
             }));
             
             videos = mappedVideos;
@@ -622,7 +605,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
       if (videos[index].id) {
         try {
-          await databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[index].id, { likes: currentLikes.toString() });
+          await databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[index].id, { likes: currentLikes.toString() });
         } catch (err) {
           console.error("Failed to update like in DB:", err);
         }
@@ -688,7 +671,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
         if (videos[currentCommentVideoIndex].id) {
           try {
-            await databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[currentCommentVideoIndex].id, { comments: currentComments.toString() });
+            await databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[currentCommentVideoIndex].id, { comments: currentComments.toString() });
           } catch (err) {
             console.error("Failed to update comment in DB:", err);
           }
@@ -709,7 +692,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       }
 
       if (videos[i].id) {
-        databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, videos[i].id, { shares: currentShares.toString() }).catch(err => console.error("Failed to update share in DB:", err));
+        databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[i].id, { shares: currentShares.toString() }).catch(err => console.error("Failed to update share in DB:", err));
       }
 
       if (navigator.share) navigator.share(data).catch(() => fallbackShare(data));
@@ -730,7 +713,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       if (currentReportVideoIndex === -1) return;
       const video = videos[currentReportVideoIndex];
       
-      showToast('Submitting report...', '⏳');
+      showToast('Submitting report...', '');
       closeModal('reportModal');
       
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -741,7 +724,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       console.log(`Reported video ${video.id} for ${reason}`);
     }
 
-    // ✅ FIX: Improved Upload Handler with Progress Bar
     function setupUploadHandlers() {
       const handleFile = async (e, source) => {
         if (!currentUser) {
@@ -755,20 +737,18 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
         const copyrightChecked = document.getElementById('copyrightCheck').checked;
         if (!copyrightChecked) {
-          showToast('Please accept the copyright declaration to proceed.', '⚠️');
+          showToast('Please accept the copyright declaration to proceed.', '️');
           return;
         }
 
         const file = e.target.files[0];
         if (!file) return;
 
-        // Show Progress Modal
         isUploading = true;
         openModal('uploadProgressModal');
         updateUploadProgress(0, 'Preparing file...');
 
         try {
-          // Simulate realistic progress (0% to 85%) while Appwrite processes
           let progress = 0;
           uploadProgressInterval = setInterval(() => {
             if (progress < 85) {
@@ -783,12 +763,11 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
           updateUploadProgress(95, 'Saving metadata...');
           
           const videoUrl = `${APPWRITE_CONFIG.endpoint}/storage/buckets/${APPWRITE_CONFIG.bucketId}/files/${fileResponse.$id}/view?project=${APPWRITE_CONFIG.projectId}`;
-          const docId = ID.unique();
 
           const nsfwKeywords = ['nsfw', 'nude', 'xxx', 'sex', 'porn', 'adult'];
           const isNSFW = nsfwKeywords.some(keyword => file.name.toLowerCase().includes(keyword));
 
-          await databases.createDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId, {
+          const rowResponse = await databases.createRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, {
             videoUrl: videoUrl,
             title: file.name,
             user: currentUser.name || "Sarwai User",
@@ -803,7 +782,20 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
 
           updateUploadProgress(100, 'Finalizing...');
           
-          const newVideo = { id: docId, src: videoUrl, user: currentUser.name || "Sarwai User", userId: currentUser.$id, verified: true, title: file.name, music: "Original Sound - You", likes: "0", comments: "0", shares: "0", desc: "Newly uploaded video! 🎬", isNSFW: isNSFW };
+          const newVideo = { 
+            id: rowResponse.$id, 
+            src: videoUrl, 
+            user: currentUser.name || "Sarwai User", 
+            userId: currentUser.$id, 
+            verified: true, 
+            title: file.name, 
+            music: "Original Sound - You", 
+            likes: "0", 
+            comments: "0", 
+            shares: "0", 
+            desc: "Newly uploaded video! 🎬", 
+            isNSFW: isNSFW 
+          };
           videos.unshift(newVideo);
           allVideos.unshift(newVideo);
           
@@ -827,7 +819,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         }
       };
 
-      document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, '🎥 Camera'));
+      document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, ' Camera'));
       document.getElementById('galleryInput').addEventListener('change', (e) => handleFile(e, '🖼️ Gallery'));
       document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
     }
@@ -843,7 +835,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
         closeModal('uploadProgressModal');
         isUploading = false;
         showToast('Upload cancelled', '⚠️');
-        // Reset inputs
         document.getElementById('cameraInput').value = '';
         document.getElementById('galleryInput').value = '';
         document.getElementById('soundInput').value = '';
@@ -882,7 +873,6 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
     });
 
-    // ===== ✅ AUTHENTICATION FUNCTIONS =====
     async function checkAuth() {
       try {
         currentUser = await account.get();
@@ -1039,18 +1029,18 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       const video = videos.find(v => v.id === docId);
 
       if (!docId || !video) {
-        showToast('वीडियो ID नहीं मिली', '❌');
+        showToast('वीडियो ID नहीं मिली', '');
         return;
       }
       if (video.userId !== currentUser.$id) {
-        showToast('You can only edit your own videos', '⚠️');
+        showToast('You can only edit your own videos', '️');
         return;
       }
 
       try {
-        await databases.updateDocument(
+        await databases.updateRow(
           APPWRITE_CONFIG.databaseId,
-          APPWRITE_CONFIG.collectionId,
+          APPWRITE_CONFIG.tableId,
           docId,
           { title: newTitle, desc: newDesc }
         );
@@ -1082,7 +1072,7 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       
       showToast('वीडियो हटाया जा रहा है...', '⏳');
       try {
-        await databases.deleteDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId);
+        await databases.deleteRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, docId);
         
         if (fileUrl) {
           const fileIdMatch = fileUrl.match(/\/files\/([^\/\?]+)/);
@@ -1213,16 +1203,14 @@ body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
       document.body.classList.remove('show-description');
     });
 
-    // ✅ FIX: Keyboard Hiding Text Input
     document.querySelectorAll('.keyboard-focus-input').forEach(input => {
       input.addEventListener('focus', () => {
         setTimeout(() => {
           input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300); // Wait for keyboard animation to start
+        }, 300);
       });
     });
 
-    // ===== Init =====
     async function initApp() {
       await checkAuth();
       fetchVideos();
