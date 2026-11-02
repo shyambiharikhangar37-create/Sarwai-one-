@@ -1,1228 +1,966 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#000" />
-<title>Sarwai - Modern Video Platform</title>
-<script src="https://cdn.jsdelivr.net/npm/appwrite@15.0.0"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100dvh;width:100%;overflow:hidden;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-button{background:none;border:none;color:inherit;cursor:pointer;font:inherit}
-input,textarea{font:inherit;outline:none;border:none}
-#app{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>बुंदेली बौछार BUNDELI BAUCHHAR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Scroll Snap Configuration for Center Alignment */
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            scroll-padding-top: 140px;    /* Header + Categories height adjustment */
+            scroll-padding-bottom: 80px;  /* Bottom nav height adjustment */
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1410;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2e7d32, #c62828, #f9a825);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 { font-size: 26px; font-weight: bold; letter-spacing: 1px; }
+        .header p { font-size: 13px; margin-top: 5px; opacity: 0.95; }
+        
+        .categories {
+            display: flex;
+            overflow-x: auto;
+            padding: 15px;
+            gap: 10px;
+            background: #1a241a;
+            position: sticky;
+            top: 76px;
+            z-index: 90;
+        }
+        
+        .category-btn {
+            background: #2a3a2a;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        
+        .category-btn.active { background: #c62828; }
+        .category-btn:hover { background: #f9a825; color: #000; }
+        
+        .video-list { padding: 15px; }
+        
+        .video-card {
+            background: #1a241a;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: visible;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            border: 1px solid #2a3a2a;
+            position: relative;
+            z-index: 1;
+            /* Scroll Snap Properties */
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: #000;
+            overflow: visible;
+            z-index: 1000;
+        }
+        
+        .youtube-player-div {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
 
-#toast {
-  position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-150%);
-  background: rgba(30, 30, 30, 0.95); color: #fff; padding: 12px 24px; border-radius: 30px;
-  font-size: 14px; font-weight: 600; z-index: 99999; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px;
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
-  pointer-events: none; white-space: nowrap;
-}
-#toast.show { transform: translateX(-50%) translateY(0); }
+        /* ROBUST FULLSCREEN CSS */
+        .video-wrapper:fullscreen,
+        .video-wrapper:-webkit-full-screen,
+        .video-wrapper:-moz-full-screen,
+        .video-wrapper:-ms-fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            max-height: 100dvh !important;
+            padding-bottom: 0 !important;
+            background: #000 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 2147483647 !important;
+            margin: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+        }
+        
+        .video-wrapper:fullscreen .youtube-player-div,
+        .video-wrapper:-webkit-full-screen .youtube-player-div,
+        .video-wrapper:-moz-full-screen .youtube-player-div,
+        .video-wrapper:-ms-fullscreen .youtube-player-div,
+        .video-wrapper:fullscreen iframe,
+        .video-wrapper:-webkit-full-screen iframe,
+        .video-wrapper:-moz-full-screen iframe,
+        .video-wrapper:-ms-fullscreen iframe {
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            border: none !important;
+            z-index: 2147483647 !important;
+        }
 
-body.cinematic-mode #app{position:fixed;inset:0;z-index:9999;background:#000}
-body.cinematic-mode .feed{overflow:hidden}
-body.cinematic-mode .video-item{position:fixed;inset:0;width:100vw;height:100vh;z-index:10000}
-body.cinematic-mode .video-item video{width:100%;height:100%;object-fit:contain}
-body.cinematic-mode .video-item video.fit-cover{object-fit:cover}
-body.cinematic-mode .topbar,body.cinematic-mode .bottomnav,body.cinematic-mode .side-actions,
-body.cinematic-mode .v-controls,body.cinematic-mode .bottom-info,body.cinematic-mode .progress-bar,
-body.cinematic-mode .cinematic-description{transition:opacity .4s cubic-bezier(.4,0,.2,1),transform .4s cubic-bezier(.4,0,.2,1)}
-body.cinematic-mode.nav-hidden .bottomnav{transform:translateY(100%);opacity:0;pointer-events:none}
-body.cinematic-mode.controls-hidden .topbar,body.cinematic-mode.controls-hidden .side-actions,
-body.cinematic-mode.controls-hidden .v-controls,body.cinematic-mode.controls-hidden .progress-bar{opacity:0;pointer-events:none;transform:translateY(-10px)}
-body.cinematic-mode.controls-hidden .bottom-info,body.cinematic-mode.controls-hidden .cinematic-description{opacity:0;pointer-events:none;transform:translateY(20px)}
+        .fullscreen-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 2147483647;
+            display: none;
+        }
+        
+        .video-wrapper:fullscreen .fullscreen-controls,
+        .video-wrapper:-webkit-full-screen .fullscreen-controls,
+        .video-wrapper:-moz-full-screen .fullscreen-controls,
+        .video-wrapper:-ms-fullscreen .fullscreen-controls {
+            display: flex !important;
+            position: absolute !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 2147483647 !important;
+        }
+        
+        .close-fullscreen {
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: 2px solid #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+            z-index: 2147483647 !important;
+        }
+        
+        .close-fullscreen:active {
+            background: rgba(255,255,255,0.2);
+            transform: scale(0.95);
+        }
+        
+        /* Compact action buttons - directly below video */
+        .video-actions-compact {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 15px;
+            background: #1a241a;
+            border-bottom: 1px solid #2a3a2a;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .action-btn-compact {
+            background: none;
+            border: none;
+            color: #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 10px;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .action-btn-compact:hover { color: #f9a825; }
+        .action-btn-compact.liked { color: #c62828; }
+        .action-btn-compact .icon { font-size: 22px; }
+        .action-btn-compact .label { font-size: 11px; }
+        
+        .video-info { 
+            padding: 12px 15px;
+            position: relative;
+            z-index: 10;
+        }
+        .video-title { 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            color: #f9a825; 
+        }
+        .video-desc { 
+            font-size: 13px; 
+            color: #aaa; 
+        }
+        
+        /* Ad container styles */
+        .ad-container {
+            background: #0f1410;
+            padding: 12px 15px;
+            border-top: 1px solid #2a3a2a;
+            border-bottom: 1px solid #2a3a2a;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .ad-label {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .ad-placeholder {
+            width: 100%;
+            height: 90px;
+            background: linear-gradient(135deg, #1a241a, #2a3a2a);
+            border: 2px dashed #3a4a3a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .comment-section {
+            padding: 12px 15px;
+            background: #0f1410;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .comment-section h4 { color: #f9a825; font-size: 13px; margin-bottom: 8px; }
+        
+        .comment-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-input input {
+            flex: 1;
+            background: #1a241a;
+            color: #fff;
+            border: 1px solid #2a3a2a;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            outline: none;
+        }
+        
+        .comment-input button {
+            background: #2e7d32;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .comments-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .comment-item {
+            background: #1a241a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .comment-item .del {
+            color: #c62828;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .comment-item .name { color: #f9a825; font-weight: bold; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background: #1a241a;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+        }
+        
+        .modal-content h3 { color: #f9a825; margin-bottom: 15px; text-align: center; }
+        
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .share-btn {
+            background: #2a3a2a;
+            border: none;
+            color: #fff;
+            padding: 14px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .share-btn:hover { background: #3a4a3a; }
+        .share-btn .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        
+        .close-modal {
+            width: 100%;
+            background: #c62828;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a241a;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            border-top: 2px solid #2e7d32;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .nav-item.active { color: #f9a825; }
+        .nav-item span { display: block; font-size: 11px; margin-top: 4px; }
+        
+        .content { padding-bottom: 80px; }
+        
+        .categories::-webkit-scrollbar { display: none; }
+        .categories { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e7d32;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .toast.show { opacity: 1; }
+        
+        /* Hide UI elements completely during fullscreen */
+        body.fullscreen-mode .header,
+        body.fullscreen-mode .categories,
+        body.fullscreen-mode .bottom-nav {
+            display: none !important;
+        }
+        body.fullscreen-mode .content {
+            padding-bottom: 0 !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            overflow: hidden !important;
+        }
 
-.cinematic-description{position:absolute;left:20px;right:20px;bottom:80px;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.85));padding:18px 20px;border-radius:14px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);z-index:15;opacity:0;pointer-events:none;transform:translateY(20px);max-height:50vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6)}
-body.cinematic-mode.show-description .cinematic-description{opacity:1;pointer-events:auto;transform:translateY(0)}
-.cinematic-description .cin-title{font-weight:700;font-size:16px;margin-bottom:8px;color:#fff;line-height:1.3}
-.cinematic-description .cin-desc{font-size:13px;opacity:.9;line-height:1.55;color:#fff;margin-bottom:12px}
-.cinematic-description .cin-meta{display:flex;align-items:center;gap:10px;font-size:12px;opacity:.75;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)}
-.cinematic-description .cin-music-icon{animation:spin 3s linear infinite}
-.cinematic-exit{position:absolute;top:16px;right:16px;z-index:30;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;opacity:0;transition:opacity .3s;color:#fff}
-body.cinematic-mode:not(.controls-hidden) .cinematic-exit{opacity:1}
-.cinematic-exit:active{transform:scale(.9);background:rgba(0,0,0,.8)}
-.cinematic-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);padding:12px 20px;border-radius:24px;font-size:13px;color:#fff;opacity:0;pointer-events:none;z-index:25;backdrop-filter:blur(10px);transition:opacity .4s;border:1px solid rgba(255,255,255,.15)}
-.cinematic-hint.show{opacity:1}
-
-.topbar { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 36px; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 0; background: #666666; pointer-events: none; }
-.topbar .logo-container { display: flex; align-items: center; height: 100%; pointer-events: auto; }
-.new-logo { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,.4); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); position: relative; }
-.new-logo .part-saffron { flex: 1; background: #FF9933; }
-.new-logo .part-lightblue { flex: 1; background: #00BFFF; }
-.new-logo .logo-shape { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; background: rgba(255, 255, 255, 0.95); border-radius: 6px; display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-.new-logo .logo-shape span { color: #000000; font-weight: 900; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1; }
-.topbar .tabs{display:flex;gap:20px;pointer-events:auto;height:100%;align-items:center;padding-right:12px;}
-.topbar .tab-btn{font-size:14px;font-weight:600;opacity:.8;transition:opacity .2s;color:#fff;}
-.topbar .tab-btn.active{opacity:1;font-weight:800;}
-
-.feed{flex:1;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none}
-.feed::-webkit-scrollbar{display:none}
-.video-item{position:relative;width:100%;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;background:#000}
-.video-item video{width:100%;height:100%;object-fit:contain;background:#000;transition:all .3s}
-.video-item video.fit-cover{object-fit:cover}
-.overlay{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 30%,transparent 60%,rgba(0,0,0,.8) 100%)}
-
-.progress-bar{position:absolute;bottom:64px;left:0;right:0;height:3px;background:rgba(255,255,255,.2);z-index:15}
-.progress-fill{height:100%;background:#ff2d55;width:0;transition:width .1s linear}
-
-.v-controls{position:absolute;bottom:80px;left:14px;right:80px;z-index:12;display:flex;align-items:center;gap:10px;pointer-events:auto}
-.v-fill-btn{padding:8px 16px;border-radius:20px;background:rgba(255,45,85,.95);font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;border:2px solid rgba(255,255,255,.2)}
-.v-fill-btn:active{transform:scale(.95)}
-.v-fill-btn.active{background:rgba(255,255,255,.25);border-color:#ff2d55}
-.speed-btn{padding:8px 12px;border-radius:20px;background:rgba(255,255,255,.2);font-size:12px;font-weight:700;color:#fff;backdrop-filter:blur(10px)}
-
-.side-actions{position:absolute;right:12px;bottom:120px;display:flex;flex-direction:column;gap:20px;pointer-events:auto;z-index:10}
-.side-actions .act{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:600;cursor:pointer}
-.side-actions .act .ico{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .2s;text-shadow:0 2px 4px rgba(0,0,0,.5)}
-.side-actions .act:active .ico{transform:scale(.9)}
-.side-actions .act.liked .ico{color:#ff2d55;animation:likeAnim .5s}
-@keyframes likeAnim{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-.side-actions .act.sound-on .ico{color:#00ff88}
-.side-actions .act.sound-off .ico{color:#ff4444}
-
-.bottom-info{position:absolute;left:14px;right:80px;bottom:120px;pointer-events:auto;z-index:10}
-.bottom-info .user{font-weight:700;margin-bottom:6px;font-size:15px;display:flex;align-items:center;gap:6px}
-.bottom-info .user .verified{color:#00d4ff;font-size:14px}
-.bottom-info .title{font-size:14px;line-height:1.35;opacity:.95;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
-.bottom-info .music{font-size:12px;opacity:.85;display:flex;align-items:center;gap:6px}
-.bottom-info .music .music-icon{animation:spin 3s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.play-ind{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .25s;z-index:8}
-.play-ind.show{opacity:1}
-.play-ind .ring{width:80px;height:80px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:36px}
-
-.double-tap-heart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:100px;pointer-events:none;z-index:9;opacity:0}
-.double-tap-heart.show{animation:heartPop .8s ease-out}
-@keyframes heartPop{0%{transform:translate(-50%,-50%) scale(0);opacity:0}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
-
-.loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;z-index:5;gap:12px}
-.spinner{width:44px;height:44px;border:3px solid #333;border-top-color:#ff2d55;border-radius:50%;animation:spin 1s linear infinite}
-.loader-text{font-size:12px;opacity:.6}
-
-.nsfw-warning { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:25; cursor:pointer; backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); text-align:center; padding:20px; }
-.nsfw-warning .warn-icon { font-size: 36px; margin-bottom: 12px; }
-.nsfw-warning .warn-title { font-weight: 700; font-size: 18px; color: #ff4444; margin-bottom: 6px; }
-.nsfw-warning .warn-desc { font-size: 13px; opacity: 0.9; color: #fff; line-height: 1.4; }
-
-.bottomnav{position:absolute;left:0;right:0;bottom:0;z-index:25;height:64px;display:flex;align-items:center;justify-content:space-around;background:rgba(10,10,10,.97);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px);transition:transform .35s ease}
-.bottomnav.nav-hidden{transform:translateY(100%)}
-.nav-btn{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;opacity:.7;cursor:pointer}
-.nav-btn.active{opacity:1;color:#ff2d55}
-.nav-btn .n-ico{font-size:24px;line-height:1}
-.nav-btn.upload .n-ico{width:46px;height:32px;border-radius:8px;background:linear-gradient(135deg,#ff2d55,#ff9500);display:flex;align-items:center;justify-content:center;position:relative}
-.nav-btn.upload .n-ico::before,.nav-btn.upload .n-ico::after{content:"";position:absolute;width:30px;height:24px;border-radius:6px;background:#fff;mix-blend-mode:difference}
-.nav-btn.upload .n-ico::before{transform:translateX(-4px)}
-.nav-btn.upload .n-ico::after{transform:translateX(4px)}
-.nav-btn.upload .n-ico span{position:relative;z-index:2;font-size:18px;color:#000;font-weight:900}
-
-.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
-.modal.open{display:flex;animation:fade .2s}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-.sheet{width:100%;max-width:500px;background:#141414;border-radius:18px 18px 0 0;padding:18px;padding-bottom: 30px;max-height:80dvh;overflow-y:auto;animation:slide .25s}
-@keyframes slide{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet h3{margin-bottom:14px;font-size:17px}
-.sheet .close{float:right;font-size:22px;opacity:.7;cursor:pointer}
-
-.search-box{display:flex;gap:8px;margin-bottom:12px}
-.search-box input{flex:1;background:#222;color:#fff;padding:12px 14px;border-radius:10px;font-size:14px}
-.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.tab{padding:7px 14px;border-radius:20px;background:#222;font-size:13px;cursor:pointer}
-.tab.active{background:#ff2d55}
-
-.upload-opts{display:flex;gap:14px;justify-content:center;margin-top:10px;flex-wrap:wrap}
-.upload-opt{width:120px;height:120px;border-radius:14px;background:#222;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;font-size:13px;font-weight:600;transition:transform .2s}
-.upload-opt:active{transform:scale(.95)}
-.upload-opt .u-ico{font-size:34px}
-
-.upload-progress-container { width: 100%; background: #333; height: 8px; border-radius: 4px; margin: 20px 0; overflow: hidden; }
-.upload-progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff2d55, #ff9500); transition: width 0.3s ease; border-radius: 4px; }
-.upload-status-text { font-size: 14px; opacity: 0.8; margin-bottom: 10px; font-weight: 500; }
-
-.profile-page{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;overflow-y:auto}
-.profile-page.open{display:flex}
-.profile-header{padding:20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.1)}
-.profile-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#ff2d55,#0044ff);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900}
-.profile-name{font-size:20px;font-weight:700;margin-bottom:4px}
-.profile-handle{font-size:13px;opacity:.7;margin-bottom:14px}
-.profile-stats{display:flex;justify-content:center;gap:30px;margin-bottom:14px}
-.profile-stats .stat{text-align:center}
-.profile-stats .stat-num{font-size:18px;font-weight:700}
-.profile-stats .stat-label{font-size:11px;opacity:.7}
-.profile-bio{font-size:13px;opacity:.85;padding:0 20px;margin-bottom:14px}
-.edit-profile-btn{padding:8px 24px;background:#222;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer}
-.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
-.profile-grid .grid-item{aspect-ratio:9/16;background:#222;position:relative;overflow:hidden}
-.profile-grid .grid-item video{width:100%;height:100%;object-fit:cover}
-.profile-grid .grid-item .views{position:absolute;bottom:4px;left:4px;font-size:11px;display:flex;align-items:center;gap:3px}
-</style>
+        /* Landscape Mode: Show ONLY video list, hide everything else */
+        @media (orientation: landscape) {
+            .header,
+            .categories,
+            .bottom-nav,
+            .video-actions-compact,
+            .video-info,
+            .ad-container,
+            .comment-section {
+                display: none !important;
+            }
+            
+            body {
+                background: #000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .content {
+                padding: 0 !important;
+                padding-bottom: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            
+            .video-list {
+                padding: 0 !important;
+                height: auto !important;
+                overflow-y: visible !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 0 !important;
+            }
+            
+            .video-card {
+                margin: 0 !important;
+                border-radius: 0 !important;
+                border: none !important;
+                border-bottom: 2px solid #2a3a2a !important;
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
+                background: #000 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                flex-shrink: 0 !important;
+                width: 100% !important;
+                /* Ensure snap works in landscape too */
+                scroll-snap-align: center !important;
+            }
+            
+            .video-wrapper {
+                width: 100% !important;
+                height: auto !important;
+                padding-bottom: 56.25% !important;
+                position: relative !important;
+                background: #000 !important;
+            }
+            
+            .youtube-player-div, 
+            .youtube-player-div iframe {
+                width: 100% !important;
+                height: 100% !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<input type="file" id="cameraInput" accept="video/*" capture="environment" style="display:none">
-<input type="file" id="galleryInput" accept="video/*,image/*" style="display:none">
-<input type="file" id="soundInput" accept="audio/*" style="display:none">
-
-<div id="app">
-  <div class="topbar">
-    <div class="logo-container">
-      <div class="new-logo">
-        <div class="part-saffron"></div>
-        <div class="part-lightblue"></div>
-        <div class="logo-shape"><span>S1</span></div>
-      </div>
-    </div>
-    <div class="tabs">
-      <button class="tab-btn" data-tab="following">Following</button>
-      <button class="tab-btn active" data-tab="foryou">For You</button>
-    </div>
-  </div>
-
-  <div class="feed" id="feed"></div>
-
-  <div class="bottomnav" id="bottomnav">
-    <button class="nav-btn active" data-page="home"><span class="n-ico">🏠</span><span>Home</span></button>
-    <button class="nav-btn" data-page="discover"><span class="n-ico">🔍</span><span>Discover</span></button>
-    <button class="nav-btn upload" data-page="upload"><span class="n-ico"><span>+</span></span><span></span></button>
-    <button class="nav-btn" data-page="inbox"><span class="n-ico">💬</span><span>Inbox</span></button>
-    <button class="nav-btn" data-page="profile"><span class="n-ico"></span><span>Profile</span></button>
-  </div>
-</div>
-
-<div class="profile-page" id="profilePage">
-  <div id="authView" style="display:none; flex-direction:column; height:100%; padding:24px; overflow-y:auto;">
-    <div style="text-align:center; margin-bottom:30px; margin-top:40px;">
-      <div class="new-logo" style="width:64px; height:64px; margin:0 auto 16px;">
-        <div class="part-saffron"></div>
-        <div class="part-lightblue"></div>
-        <div class="logo-shape"><span>S1</span></div>
-      </div>
-      <h2 style="font-size:24px; font-weight:700; color:#fff;">Welcome to Sarwai</h2>
-      <p style="opacity:0.7; font-size:14px; margin-top:8px; color:#fff;">Login to upload, like, and manage your profile.</p>
+    <div class="header" id="mainHeader">
+        <h1>🌾 बुंदेली बौछार </h1>
+        <p>BUNDELI BAUCHHAR (bundelkhand)</p>
+        <p>बुंदेलखंड की माटी की महक - गीत, नाटक, कहानियाँ</p>
     </div>
     
-    <div style="display:flex; gap:8px; margin-bottom:24px; background:#222; padding:4px; border-radius:12px;">
-      <button id="tabLogin" class="tab active" style="flex:1; text-align:center; border-radius:8px; padding:10px;" onclick="switchAuthTab('login')">Login</button>
-      <button id="tabRegister" class="tab" style="flex:1; text-align:center; border-radius:8px; padding:10px;" onclick="switchAuthTab('register')">Register</button>
-    </div>
-
-    <form id="authForm" onsubmit="handleAuth(event)" style="display:flex; flex-direction:column; gap:16px;">
-      <input type="text" id="authName" placeholder="Full Name" style="display:none; background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <input type="email" id="authEmail" placeholder="Email Address" required style="background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <input type="password" id="authPassword" placeholder="Password (min 8 chars)" required minlength="8" style="background:#222; color:#fff; padding:14px; border-radius:10px; font-size:14px; outline:none; border:1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      
-      <button type="submit" id="authSubmitBtn" style="background:#ff2d55; color:#fff; padding:14px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer; margin-top:10px; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Login</button>
-    </form>
-    <div id="authError" style="color:#ff4444; font-size:13px; text-align:center; margin-top:10px; display:none;"></div>
-  </div>
-
-  <div id="profileView" style="display:none; flex-direction:column; overflow-y:auto; height:100%;">
-    <div class="profile-header">
-      <div class="profile-avatar" id="profileAvatar">S</div>
-      <div class="profile-name" id="profileName">Sarwai User</div>
-      <div class="profile-handle" id="profileHandle">@user</div>
-      <div class="profile-stats">
-        <div class="stat"><div class="stat-num" id="statFollowing">0</div><div class="stat-label">Following</div></div>
-        <div class="stat"><div class="stat-num" id="statFollowers">0</div><div class="stat-label">Followers</div></div>
-        <div class="stat"><div class="stat-num" id="statLikes">0</div><div class="stat-label">Likes</div></div>
-      </div>
-      <div class="profile-bio" id="profileBio">🎬 Creating amazing content ✨</div>
-      <div style="display:flex; gap:10px; justify-content:center; margin-top:14px;">
-        <button class="edit-profile-btn" onclick="openModal('editProfileModal')">Edit Profile</button>
-        <button class="edit-profile-btn" style="background:#ff4444; color:#fff;" onclick="logout()">Logout</button>
-      </div>
-    </div>
-    <div class="profile-grid" id="profileGrid"></div>
-  </div>
-</div>
-
-<div class="modal" id="discoverModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('discoverModal')"></span>
-    <h3> Discover</h3>
-    <div class="search-box"><input type="text" id="searchInput" placeholder="Search videos, users, sounds..." /></div>
-    <div class="tabs">
-      <div class="tab active">Trending</div>
-      <div class="tab">Music</div>
-      <div class="tab">Comedy</div>
-      <div class="tab">Dance</div>
-      <div class="tab">Gaming</div>
-      <div class="tab">Food</div>
-    </div>
-    <p style="opacity:.6;font-size:13px;text-align:center;padding:30px 0">🔥 Trending content will appear here</p>
-  </div>
-</div>
-
-<div class="modal" id="uploadModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('uploadModal')">✕</span>
-    <h3>📤 Upload Video</h3>
-    <div class="upload-opts">
-      <div class="upload-opt" onclick="document.getElementById('cameraInput').click()">
-        <div class="u-ico">🎥</div><div>Camera</div>
-      </div>
-      <div class="upload-opt" onclick="document.getElementById('galleryInput').click()">
-        <div class="u-ico">🖼️</div><div>Gallery</div>
-      </div>
-      <div class="upload-opt" onclick="document.getElementById('soundInput').click()">
-        <div class="u-ico">🎵</div><div>Sound</div>
-      </div>
-    </div>
-    
-    <div style="margin-top:20px; padding:16px; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3); border-radius:12px; font-size:13px; color:#ffaaaa;">
-      <label style="display:flex; gap:12px; align-items:flex-start; cursor:pointer;">
-        <input type="checkbox" id="copyrightCheck" style="margin-top:3px; width:18px; height:18px; accent-color:#ff2d55; flex-shrink:0;">
-        <span style="line-height:1.4;">I confirm that I own the copyright to this content or have explicit permission to use it. I understand that false claims may result in content removal or account suspension.</span>
-      </label>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="uploadProgressModal">
-  <div class="sheet" style="text-align: center; max-height: 250px; padding-bottom: 30px;">
-    <span class="close" onclick="cancelUpload()">✕</span>
-    <h3>📤 Uploading Video</h3>
-    <div class="upload-progress-container">
-      <div id="uploadProgressBar" class="upload-progress-bar"></div>
-    </div>
-    <p id="uploadStatusText" class="upload-status-text">Preparing file...</p>
-    <button onclick="cancelUpload()" style="background: #333; color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 10px;">Cancel</button>
-  </div>
-</div>
-
-<div class="modal" id="inboxModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('inboxModal')">✕</span>
-    <h3>💬 Inbox</h3>
-    <div class="tabs">
-      <div class="tab active">All Activity</div>
-      <div class="tab">Messages</div>
-    </div>
-    <p style="opacity:.6;font-size:13px;text-align:center;padding:30px 0">No new messages 📭</p>
-  </div>
-</div>
-
-<div class="modal" id="commentsModal">
-  <div class="sheet" style="max-height: 70dvh;">
-    <span class="close" onclick="closeModal('commentsModal')">✕</span>
-    <h3>💬 Comments</h3>
-    <div id="commentsList" style="padding: 10px 0; opacity: 0.7; text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; font-size: 14px;">No comments yet. Be the first!</div>
-    <div style="display: flex; gap: 8px; margin-top: 12px;">
-      <input type="text" id="commentInput" class="keyboard-focus-input" placeholder="Add a comment..." style="flex: 1; background: #222; color: #fff; padding: 12px 14px; border-radius: 20px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <button onclick="postComment()" style="background: #ff2d55; color: #fff; padding: 12px 16px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">Post</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="editProfileModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('editProfileModal')">✕</span>
-    <h3>️ Edit Profile & Settings</h3>
-    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
-      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Name</label>
-      <input type="text" id="editName" class="keyboard-focus-input" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Bio</label>
-      <input type="text" id="editBio" class="keyboard-focus-input" value="" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:14px; background:#222; border-radius:10px; margin-top:8px;">
-        <div>
-          <div style="font-weight:600; font-size:14px;">Show Sensitive (NSFW) Content</div>
-          <div style="font-size:11px; opacity:0.6; margin-top:2px;">Display content flagged as sensitive.</div>
+    <div class="content">
+        <div class="categories" id="mainCategories">
+            <button class="category-btn active" onclick="filterCategory('all', this)">सभी</button>
+            <button class="category-btn" onclick="filterCategory('song', this)">लोकगीत</button>
+            <button class="category-btn" onclick="filterCategory('drama', this)">नाटक</button>
+            <button class="category-btn" onclick="filterCategory('comedy', this)">हास्य</button>
+            <button class="category-btn" onclick="filterCategory('story', this)">कहानी</button>
+            <button class="category-btn" onclick="filterCategory('culture', this)">संस्कृति</button>
         </div>
-        <input type="checkbox" id="nsfwToggle" style="width:20px; height:20px; accent-color:#ff2d55;" onchange="toggleNSFWSetting(this.checked)">
-      </div>
-
-      <button onclick="saveProfile()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="editVideoModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('editVideoModal')">✕</span>
-    <h3>✏️ वीडियो एडिट करें</h3>
-    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
-      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Title (शीर्षक)</label>
-      <input type="text" id="editVideoTitle" class="keyboard-focus-input" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <label style="font-size: 12px; opacity: 0.7; margin-left: 4px; font-weight: 600;">Description (विवरण)</label>
-      <input type="text" id="editVideoDesc" class="keyboard-focus-input" style="background: #222; color: #fff; padding: 12px 14px; border-radius: 10px; font-size: 14px; outline: none; border: 1px solid transparent; transition: border 0.2s;" onfocus="this.style.borderColor='#ff2d55'" onblur="this.style.borderColor='transparent'" />
-      <input type="hidden" id="editVideoId" />
-      <button onclick="saveVideoEdit()" style="background: #ff2d55; color: #fff; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; margin-top: 8px; cursor: pointer; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">सेव करें (Save)</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="reportModal">
-  <div class="sheet">
-    <span class="close" onclick="closeModal('reportModal')">✕</span>
-    <h3>⚠️ Report Content</h3>
-    <p style="font-size:13px; opacity:0.7; margin-bottom:16px;">Help us keep Sarwai safe. Select a reason for reporting this video.</p>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <button onclick="submitReport('copyright')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
-        <span>©️</span> Copyright Infringement
-      </button>
-      <button onclick="submitReport('nsfw')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
-        <span>🔞</span> NSFW / Inappropriate Content
-      </button>
-      <button onclick="submitReport('spam')" style="background:#222; color:#fff; padding:14px; border-radius:10px; text-align:left; font-weight:600; display:flex; align-items:center; gap:10px; border:1px solid transparent; transition:0.2s;" onmouseover="this.style.borderColor='#ff2d55'" onmouseout="this.style.borderColor='transparent'">
-        <span>🚫</span> Spam or Misleading
-      </button>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
-    const APPWRITE_CONFIG = {
-        endpoint: 'https://cloud.appwrite.io/v1',
-        projectId: '6aa2ebbf000296878b87',
-        databaseId: '6aa2ecdd0037d1cdddcd',
-        tableId: '6adbc1f200025b2558ca',
-        bucketId: '6aa2f5a00028668aa537',
-    };
-
-    const { Client, Databases, Storage, ID, Query, Account } = Appwrite;
-    const client = new Client()
-        .setEndpoint(APPWRITE_CONFIG.endpoint)
-        .setProject(APPWRITE_CONFIG.projectId);
-    
-    const databases = new Databases(client);
-    const storage = new Storage(client);
-    const account = new Account(client);
-
-    let videos = [];
-    let allVideos = []; 
-    let currentUser = null;
-    let allowNSFW = localStorage.getItem('sarwai_allow_nsfw') === 'true';
-
-    const feed = document.getElementById('feed');
-    let currentIndex = 0;
-    let lastTapTime = 0;
-    
-    let isUploading = false;
-    let uploadProgressInterval = null;
-
-    function showToast(message, icon = 'ℹ️') {
-      const toast = document.getElementById('toast');
-      toast.innerHTML = `<span style="font-size: 18px;">${icon}</span><span>${message}</span>`;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    function formatCount(num) {
-      if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-      if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-      return num.toString();
-    }
-
-    function buildFeed() {
-      feed.innerHTML = '';
-      if (videos.length === 0) {
-        feed.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;padding:20px;text-align:center;"><div style="font-size:64px;margin-bottom:20px;">📭</div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">No videos yet!</div><div style="font-size:14px;opacity:.7;max-width:260px;line-height:1.4;">Tap the <b style="color:#ff2d55">+</b> button below to upload your first original video.</div></div>';
-        setupProfileGrid();
-        return;
-      }
-
-      videos.forEach((v, i) => {
-        const item = document.createElement('div');
-        item.className = 'video-item';
-        item.dataset.index = i;
         
-        const safeTitle = v.title ? v.title.replace(/"/g, '&quot;') : 'Untitled';
-        const safeDesc = v.desc ? v.desc.replace(/"/g, '&quot;') : '';
-        const safeMusic = v.music ? v.music.replace(/"/g, '&quot;') : 'Original Sound';
-        const safeUser = v.user ? v.user.replace(/"/g, '&quot;') : 'user';
+        <div class="video-list" id="videoList"></div>
+    </div>
+    
+    <div class="bottom-nav" id="mainNav">
+        <div class="nav-item active" onclick="showPage('home', this)">🏠<span>होम</span></div>
+        <div class="nav-item" onclick="showPage('search', this)">🔍<span>खोजें</span></div>
+        <div class="nav-item" onclick="showPage('upload', this)">➕<span>अपलोड</span></div>
+        <div class="nav-item" onclick="showPage('profile', this)">👤<span>प्रोफ़ाइल</span></div>
+    </div>
+    
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <h3>📤 शेयर करें</h3>
+            <div class="share-options">
+                <button class="share-btn" onclick="shareVia('whatsapp')"><span class="icon">💬</span>WhatsApp</button>
+                <button class="share-btn" onclick="shareVia('facebook')"><span class="icon">📘</span>Facebook</button>
+                <button class="share-btn" onclick="shareVia('twitter')"><span class="icon">🐦</span>Twitter</button>
+                <button class="share-btn" onclick="shareVia('telegram')"><span class="icon">✈️</span>Telegram</button>
+                <button class="share-btn" onclick="shareVia('copy')"><span class="icon">🔗</span>Copy Link</button>
+                <button class="share-btn" onclick="shareVia('more')"><span class="icon">⋯</span>और</button>
+            </div>
+            <button class="close-modal" onclick="closeModal()">बंद करें</button>
+        </div>
+    </div>
+    
+    <!-- Download Modal -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <h3>⬇️ डाउनलोड करें</h3>
+            <p style="color: #aaa; font-size: 13px; margin-bottom: 15px; text-align: center;">
+                वीडियो डाउनलोड करने के लिए लिंक कॉपी करें:
+            </p>
+            <div style="background: #0f1410; padding: 10px; border-radius: 8px; word-break: break-all; font-size: 12px; margin-bottom: 12px;" id="downloadLink"></div>
+            <button class="share-btn" style="width: 100%; margin-bottom: 10px;" onclick="copyDownloadLink()">📋 लिंक कॉपी करें</button>
+            <button class="share-btn" style="width: 100%; margin-bottom: 10px; background: #2e7d32;" onclick="openDownloader()">🔽 डाउनलोडर खोलें</button>
+            <button class="close-modal" onclick="closeDownloadModal()">बंद करें</button>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const videos = [
+            { id: 1, title: "हरदौल की लीला - बुंदेली नाटक", desc: "बुंदेलखंड की प्रसिद्ध लोक कथा", category: "drama", youtubeId: "4NpfAs5_vLs" },
+            { id: 2, title: "बुंदेली लोकगीत - रैया", desc: "माटी की खुशबू भरे गीत", category: "song", youtubeId: "o0bkp9zwNk4" },
+            { id: 3, title: "बुंदेली हास्य कवि सम्मेलन", desc: "हँसी-मज़ाक का मेला", category: "comedy", youtubeId: "dQw4w9WgXcQ" },
+            { id: 4, title: "छाँद कौरी की कहानी", desc: "बुंदेलखंड की प्रेम कथा", category: "story", youtubeId: "juKd26qkWAo" },
+            { id: 5, title: "दीवारियाँ नाटक - बुंदेली", desc: "समाज पर व्यंग्य", category: "drama", youtubeId: "kqtD5dpn9C8" },
+            { id: 6, title: "बुंदेली संस्कृति और त्योहार", desc: "हमारी पहचान, हमारी धरोहर", category: "culture", youtubeId: "wNDGgL73ihY" }
+        ];
         
-        const nsfwId = `vid-${i}`;
-        const isNSFW = v.isNSFW || false;
-        const blurStyle = (isNSFW && !allowNSFW) ? 'filter:blur(25px) brightness(0.7);' : '';
-        const nsfwOverlay = (isNSFW && !allowNSFW) ? 
-          `<div class="nsfw-warning" onclick="document.getElementById('${nsfwId}').style.filter='none'; this.style.display='none';">
-             <div class="warn-icon">🔞</div>
-             <div class="warn-title">Sensitive Content</div>
-             <div class="warn-desc">This video may contain NSFW material. Tap to view.</div>
-           </div>` : '';
+        let currentShareId = null;
+        let currentDownloadId = null;
+        let observer = null;
+        let visibleVideoId = null;
+        
+        // YouTube Player API Variables
+        let ytPlayers = {};
+        let isYtReady = false;
 
-        item.innerHTML = `
-          <video id="${nsfwId}" src="${v.src}" style="${blurStyle}" loop playsinline webkit-playsinline preload="auto" muted></video>
-          ${nsfwOverlay}
-          <div class="loader"><div class="spinner"></div><div class="loader-text">Loading...</div></div>
-          <div class="overlay"></div>
-          <div class="cinematic-description">
-            <div class="cin-title">${safeTitle}</div>
-            <div class="cin-desc">${safeDesc}</div>
-            <div class="cin-meta"><span class="cin-music-icon">🎵</span><span>${safeMusic}</span></div>
-          </div>
-          <button class="cinematic-exit" onclick="exitCinematic()">✕</button>
-          <div class="cinematic-hint">Tap to show/hide controls</div>
-          <div class="play-ind"><div class="ring">▶</div></div>
-          <div class="double-tap-heart">❤️</div>
-          <div class="progress-bar"><div class="progress-fill"></div></div>
-          <div class="v-controls">
-            <button class="v-fill-btn" onclick="toggleFill(this)">⛶ Fill</button>
-            <button class="speed-btn" onclick="cycleSpeed(this)">1x</button>
-          </div>
-          <div class="side-actions">
-            <div class="act" onclick="toggleLike(this, ${i})"><div class="ico">❤️</div><div class="count">${formatCount(parseInt(v.likes) || 0)}</div></div>
-            <div class="act" onclick="openComments(${i})"><div class="ico">💬</div><div class="count">${formatCount(parseInt(v.comments) || 0)}</div></div>
-            <div class="act" onclick="shareVideo(${i})"><div class="ico">📤</div><div class="count">${formatCount(parseInt(v.shares) || 0)}</div></div>
-            <div class="act" onclick="openReportModal(${i})"><div class="ico">⚠️</div><div class="count">Report</div></div>
-            <div class="act sound-off" onclick="toggleSound(this)"><div class="ico">🔇</div><div class="count">Sound</div></div>
-          </div>
-          <div class="bottom-info">
-            <div class="user">@${safeUser} ${v.verified ? '<span class="verified">✓</span>' : ''}</div>
-            <div class="title">${safeTitle}</div>
-            <div class="music"><span class="music-icon">🎵</span>${safeMusic}</div>
-          </div>
-        `;
-        feed.appendChild(item);
-      });
-      setupVideoEvents();
-      setupProfileGrid();
-      playVideoAt(0);
-    }
+        window.onYouTubeIframeAPIReady = function() {
+            isYtReady = true;
+            initializePlayers();
+        };
 
-    async function fetchVideos() {
-        try {
-            const response = await databases.listRows(
-                APPWRITE_CONFIG.databaseId,
-                APPWRITE_CONFIG.tableId,
-                [Query.limit(100)]
-            );
+        function initializePlayers() {
+            document.querySelectorAll('.youtube-player-div').forEach(div => {
+                const videoId = div.id.replace('player_', '');
+                const video = videos.find(v => v.id == videoId);
+                if (video && !ytPlayers[video.id]) {
+                    ytPlayers[video.id] = new YT.Player(div.id, {
+                        videoId: video.youtubeId,
+                        playerVars: {
+                            'autoplay': 0,
+                            'controls': 1,
+                            'rel': 0,
+                            'playsinline': 1,
+                            'fs': 1
+                        }
+                    });
+                }
+            });
+        }
+
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        function loadVideos(category = 'all') {
+            Object.keys(ytPlayers).forEach(key => {
+                if (ytPlayers[key] && typeof ytPlayers[key].destroy === 'function') {
+                    ytPlayers[key].destroy();
+                }
+            });
+            ytPlayers = {};
+            visibleVideoId = null;
+
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';
             
-            const mappedVideos = response.rows.map(row => ({
-                id: row.$id,
-                src: row.videoUrl,
-                user: row.user || "sarwai_user",
-                userId: row.userId || "guest",
-                verified: true,
-                title: row.title || "Untitled Video",
-                music: row.music || "Original Sound",
-                likes: String(row.likes || 0),
-                comments: String(row.comments || 0),
-                shares: String(row.shares || 0),
-                desc: row.desc || "",
-                isNSFW: row.isNSFW || false
-            }));
+            const filtered = category === 'all' ? videos : videos.filter(v => v.category === category);
             
-            videos = mappedVideos;
-            allVideos = [...mappedVideos];
-            buildFeed();
-            updateProfileStats();
-        } catch (error) {
-            console.error("Error fetching videos:", error);
-            buildFeed(); 
-        }
-    }
-
-    function setupVideoEvents() {
-      document.querySelectorAll('.video-item').forEach((item, idx) => {
-        const video = item.querySelector('video');
-        const loader = item.querySelector('.loader');
-        const progressFill = item.querySelector('.progress-fill');
-        let retryCount = 0;
-
-        video.addEventListener('loadeddata', () => { loader.style.display = 'none'; retryCount = 0; });
-        video.addEventListener('waiting', () => { loader.style.display = 'flex'; loader.querySelector('.loader-text').textContent = 'Buffering...'; });
-        video.addEventListener('playing', () => { loader.style.display = 'none'; });
-        video.addEventListener('error', () => {
-          retryCount++;
-          if (retryCount <= 2) {
-            loader.querySelector('.loader-text').textContent = `Retrying... (${retryCount}/2)`;
-            setTimeout(() => { video.load(); video.play().catch(() => {}); }, 1500);
-          } else {
-            loader.innerHTML = `<div style="color:#ff4444;font-size:14px;text-align:center;padding:20px">⚠️ Video unavailable<br><small>Swipe for next</small></div>`;
-          }
-        });
-        video.addEventListener('timeupdate', () => {
-          if (video.duration) progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
-        });
-
-        item.addEventListener('click', (e) => {
-          if (e.target.closest('.side-actions') || e.target.closest('.v-controls') || e.target.closest('.bottom-info') || e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description') || e.target.closest('.nsfw-warning')) return;
-          const now = Date.now();
-          if (now - lastTapTime < 300) {
-            const heart = item.querySelector('.double-tap-heart');
-            heart.classList.remove('show'); void heart.offsetWidth; heart.classList.add('show');
-            const likeBtn = item.querySelector('.side-actions .act');
-            if (!likeBtn.classList.contains('liked')) {
-                const index = parseInt(item.dataset.index);
-                toggleLike(likeBtn, index);
+            filtered.forEach(video => {
+                const likeCount = parseInt(localStorage.getItem(`like_${video.id}`) || '0');
+                const isLiked = localStorage.getItem(`liked_${video.id}`) === 'true';
+                const comments = JSON.parse(localStorage.getItem(`comments_${video.id}`) || '[]');
+                
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <div class="video-wrapper" id="wrapper_${video.id}">
+                        <div class="fullscreen-controls">
+                            <button class="close-fullscreen" onclick="toggleFullscreen(${video.id})" title="फुल स्क्रीन बंद करें (ESC)">✕</button>
+                        </div>
+                        <div id="player_${video.id}" class="youtube-player-div"></div>
+                    </div>
+                    
+                    <!-- Compact action buttons directly below video -->
+                    <div class="video-actions-compact">
+                        <button class="action-btn-compact ${isLiked ? 'liked' : ''}" onclick="toggleLike(${video.id}, this, ${likeCount})">
+                            <span class="icon">${isLiked ? '❤️' : '🤍'}</span>
+                            <span class="label">${likeCount}</span>
+                        </button>
+                        <button class="action-btn-compact" onclick="toggleComments(${video.id})">
+                            <span class="icon">💬</span>
+                            <span class="label">${comments.length}</span>
+                        </button>
+                        <button class="action-btn-compact" onclick="openShare(${video.id}, '${video.title.replace(/'/g, "\\'")}')">
+                            <span class="icon">📤</span>
+                            <span class="label">शेयर</span>
+                        </button>
+                        <button class="action-btn-compact" onclick="openDownload(${video.id}, '${video.youtubeId}')">
+                            <span class="icon">⬇️</span>
+                            <span class="label">डाउनलोड</span>
+                        </button>
+                        <button class="action-btn-compact" onclick="toggleFullscreen(${video.id})">
+                            <span class="icon">⛶</span>
+                            <span class="label">फुल स्क्रीन</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Video info -->
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-desc">${video.desc}</div>
+                    </div>
+                    
+                    <!-- Ad container -->
+                    <div class="ad-container">
+                        <div class="ad-label">विज्ञापन</div>
+                        <div class="ad-placeholder">
+                            यहाँ आपका विज्ञापन दिखेगा<br>
+                            (Ad Space - 300x100)
+                        </div>
+                    </div>
+                    
+                    <div class="comment-section" id="comments_${video.id}" style="display:none;">
+                        <h4>💭 टिप्पणियाँ (${comments.length})</h4>
+                        <div class="comment-input">
+                            <input type="text" id="cinput_${video.id}" placeholder="अपनी राय लिखें...">
+                            <button onclick="addComment(${video.id})">भेजें</button>
+                        </div>
+                        <div class="comments-list" id="clist_${video.id}">
+                            ${comments.map((c, i) => `
+                                <div class="comment-item">
+                                    <div><span class="name">${c.name}:</span> ${c.text}</div>
+                                    <button class="del" onclick="deleteComment(${video.id}, ${i})">✕</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                videoList.appendChild(card);
+            });
+            
+            if (isYtReady) {
+                setTimeout(initializePlayers, 100);
             }
-            lastTapTime = 0;
-          } else {
-            lastTapTime = now;
-            setTimeout(() => { if (Date.now() - lastTapTime >= 290) togglePlay(video, item); }, 300);
-          }
-        });
-      });
-    }
-
-    function togglePlay(video, item) {
-      const ind = item.querySelector('.play-ind .ring');
-      if (video.paused) { video.play(); ind.textContent = '▶'; } 
-      else { video.pause(); ind.textContent = '⏸'; }
-      item.querySelector('.play-ind').classList.add('show');
-      setTimeout(() => item.querySelector('.play-ind').classList.remove('show'), 500);
-    }
-
-    function playVideoAt(idx) {
-      document.querySelectorAll('.video-item video').forEach((v, i) => {
-        if (i === idx) { v.currentTime = 0; v.play().catch(() => {}); } 
-        else { v.pause(); }
-      });
-      currentIndex = idx;
-    }
-
-    let scrollTimer;
-    feed.addEventListener('scroll', () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => {
-        const idx = Math.round(feed.scrollTop / window.innerHeight);
-        if (idx !== currentIndex && idx >= 0 && idx < videos.length) playVideoAt(idx);
-      }, 100);
-    });
-
-    async function toggleLike(el, index) {
-      el.classList.toggle('liked');
-      const countEl = el.querySelector('.count');
-      const isLiked = el.classList.contains('liked');
-      el.querySelector('.ico').textContent = isLiked ? '❤️' : '🤍';
-      
-      let currentLikes = parseInt(videos[index].likes) || 0;
-      if (isLiked) currentLikes++;
-      else currentLikes = Math.max(0, currentLikes - 1);
-      
-      videos[index].likes = currentLikes.toString();
-      countEl.textContent = formatCount(currentLikes);
-
-      if (videos[index].id) {
-        try {
-          await databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[index].id, { likes: currentLikes.toString() });
-        } catch (err) {
-          console.error("Failed to update like in DB:", err);
+            
+            setTimeout(setupIntersectionObserver, 500);
         }
-      }
-    }
-
-    function toggleSound(el) {
-      const video = document.querySelectorAll('.video-item video')[currentIndex];
-      if (el.classList.contains('sound-on')) {
-        el.classList.remove('sound-on'); el.classList.add('sound-off');
-        el.querySelector('.ico').textContent = '🔇'; video.muted = true;
-      } else {
-        el.classList.remove('sound-off'); el.classList.add('sound-on');
-        el.querySelector('.ico').textContent = '🔊'; video.muted = false;
-      }
-    }
-
-    function toggleFill(btn) {
-      const video = document.querySelectorAll('.video-item video')[currentIndex];
-      btn.classList.toggle('active'); video.classList.toggle('fit-cover');
-      btn.textContent = btn.classList.contains('active') ? '⛶ Contain' : '⛶ Fill';
-    }
-
-    const speeds = [1, 1.25, 1.5, 2, 0.75];
-    let speedIdx = 0;
-    function cycleSpeed(btn) {
-      speedIdx = (speedIdx + 1) % speeds.length;
-      document.querySelectorAll('.video-item video')[currentIndex].playbackRate = speeds[speedIdx];
-      btn.textContent = speeds[speedIdx] + 'x';
-    }
-
-    let currentCommentVideoIndex = -1;
-    function openComments(i) {
-      currentCommentVideoIndex = i;
-      const list = document.getElementById('commentsList');
-      list.innerHTML = `<div style="padding: 20px; text-align: center; opacity: 0.7;">No comments yet for this video. Be the first!</div>`;
-      openModal('commentsModal');
-    }
-
-    async function postComment() {
-      const input = document.getElementById('commentInput');
-      if (input.value.trim() && currentCommentVideoIndex !== -1) {
-        const list = document.getElementById('commentsList');
-        if (list.innerText.includes('No comments yet')) list.innerHTML = '';
         
-        const newComment = document.createElement('div');
-        newComment.style.cssText = 'padding: 12px; border-bottom: 1px solid #333; text-align: left; animation: fade 0.3s;';
-        const commenterName = currentUser ? currentUser.name : 'guest_user';
-        newComment.innerHTML = `<div style="font-weight: 600; font-size: 13px; margin-bottom: 4px; color: #fff;">@${commenterName}</div><div style="font-size: 14px; color: #ddd;">${input.value}</div>`;
-        list.prepend(newComment);
-        input.value = '';
-        showToast('Comment posted!', '💬');
-
-        let currentComments = parseInt(videos[currentCommentVideoIndex].comments) || 0;
-        currentComments++;
-        videos[currentCommentVideoIndex].comments = currentComments.toString();
-        
-        const videoItem = document.querySelector(`.video-item[data-index="${currentCommentVideoIndex}"]`);
-        if (videoItem) {
-          const commentCountEl = videoItem.querySelector('.side-actions .act:nth-child(2) .count');
-          if (commentCountEl) commentCountEl.textContent = formatCount(currentComments);
-        }
-
-        if (videos[currentCommentVideoIndex].id) {
-          try {
-            await databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[currentCommentVideoIndex].id, { comments: currentComments.toString() });
-          } catch (err) {
-            console.error("Failed to update comment in DB:", err);
-          }
-        }
-      }
-    }
-
-    async function shareVideo(i) {
-      const data = { title: videos[i].title, text: `Check out: ${videos[i].title}`, url: window.location.href };
-      let currentShares = parseInt(videos[i].shares) || 0;
-      currentShares++;
-      videos[i].shares = currentShares.toString();
-      
-      const videoItem = document.querySelector(`.video-item[data-index="${i}"]`);
-      if (videoItem) {
-        const shareCountEl = videoItem.querySelector('.side-actions .act:nth-child(3) .count');
-        if (shareCountEl) shareCountEl.textContent = formatCount(currentShares);
-      }
-
-      if (videos[i].id) {
-        databases.updateRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, videos[i].id, { shares: currentShares.toString() }).catch(err => console.error("Failed to update share in DB:", err));
-      }
-
-      if (navigator.share) navigator.share(data).catch(() => fallbackShare(data));
-      else fallbackShare(data);
-    }
-    
-    function fallbackShare(data) {
-      navigator.clipboard.writeText(data.url + '\n' + data.text).then(() => showToast('Link copied to clipboard!', '🔗')).catch(() => showToast('Could not copy link', '⚠️'));
-    }
-
-    let currentReportVideoIndex = -1;
-    function openReportModal(i) {
-      currentReportVideoIndex = i;
-      openModal('reportModal');
-    }
-
-    async function submitReport(reason) {
-      if (currentReportVideoIndex === -1) return;
-      const video = videos[currentReportVideoIndex];
-      
-      showToast('Submitting report...', '');
-      closeModal('reportModal');
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      let reasonText = reason === 'copyright' ? 'Copyright Infringement' : reason === 'nsfw' ? 'NSFW Content' : 'Spam';
-      showToast(`Reported for ${reasonText}. Thank you for keeping Sarwai safe.`, '✅');
-      
-      console.log(`Reported video ${video.id} for ${reason}`);
-    }
-
-    function setupUploadHandlers() {
-      const handleFile = async (e, source) => {
-        if (!currentUser) {
-          showToast('Please login to upload videos!', '⚠️');
-          closeModal('uploadModal');
-          document.getElementById('profilePage').classList.add('open');
-          checkAuth();
-          e.target.value = '';
-          return;
-        }
-
-        const copyrightChecked = document.getElementById('copyrightCheck').checked;
-        if (!copyrightChecked) {
-          showToast('Please accept the copyright declaration to proceed.', '️');
-          return;
-        }
-
-        const file = e.target.files[0];
-        if (!file) return;
-
-        isUploading = true;
-        openModal('uploadProgressModal');
-        updateUploadProgress(0, 'Preparing file...');
-
-        try {
-          let progress = 0;
-          uploadProgressInterval = setInterval(() => {
-            if (progress < 85) {
-              progress += Math.random() * 15;
-              updateUploadProgress(Math.min(progress, 85), 'Uploading to server...');
+        function toggleFullscreen(videoId) {
+            const wrapper = document.getElementById(`wrapper_${videoId}`);
+            const player = ytPlayers[videoId];
+            const isCurrentlyFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            
+            if (!isCurrentlyFullscreen) {
+                let promise = null;
+                if (wrapper.requestFullscreen) {
+                    promise = wrapper.requestFullscreen();
+                } else if (wrapper.webkitRequestFullscreen) {
+                    promise = wrapper.webkitRequestFullscreen();
+                } else if (wrapper.mozRequestFullScreen) {
+                    promise = wrapper.mozRequestFullScreen();
+                } else if (wrapper.msRequestFullscreen) {
+                    promise = wrapper.msRequestFullscreen();
+                }
+                
+                if (promise) {
+                    promise.catch(err => {
+                        console.warn("Fullscreen request failed:", err);
+                    });
+                }
+                
+                pauseAllVideos();
+                visibleVideoId = videoId;
+                
+                setTimeout(() => {
+                    if (player && typeof player.playVideo === 'function') {
+                        player.playVideo();
+                    }
+                }, 600);
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
             }
-          }, 600);
-
-          const fileResponse = await storage.createFile(APPWRITE_CONFIG.bucketId, ID.unique(), file);
-          
-          clearInterval(uploadProgressInterval);
-          updateUploadProgress(95, 'Saving metadata...');
-          
-          const videoUrl = `${APPWRITE_CONFIG.endpoint}/storage/buckets/${APPWRITE_CONFIG.bucketId}/files/${fileResponse.$id}/view?project=${APPWRITE_CONFIG.projectId}`;
-
-          const nsfwKeywords = ['nsfw', 'nude', 'xxx', 'sex', 'porn', 'adult'];
-          const isNSFW = nsfwKeywords.some(keyword => file.name.toLowerCase().includes(keyword));
-
-          const rowResponse = await databases.createRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, {
-            videoUrl: videoUrl,
-            title: file.name,
-            user: currentUser.name || "Sarwai User",
-            userId: currentUser.$id,
-            likes: "0",
-            comments: "0",
-            shares: "0",
-            music: "Original Sound - You",
-            desc: "Newly uploaded video! 🎬",
-            isNSFW: isNSFW
-          });
-
-          updateUploadProgress(100, 'Finalizing...');
-          
-          const newVideo = { 
-            id: rowResponse.$id, 
-            src: videoUrl, 
-            user: currentUser.name || "Sarwai User", 
-            userId: currentUser.$id, 
-            verified: true, 
-            title: file.name, 
-            music: "Original Sound - You", 
-            likes: "0", 
-            comments: "0", 
-            shares: "0", 
-            desc: "Newly uploaded video! 🎬", 
-            isNSFW: isNSFW 
-          };
-          videos.unshift(newVideo);
-          allVideos.unshift(newVideo);
-          
-          setTimeout(() => {
-            closeModal('uploadProgressModal');
-            showToast('Upload successful! Video is live.', '✅');
-            buildFeed();
-            updateProfileStats();
-            closeModal('uploadModal');
-            e.target.value = '';
-            document.getElementById('copyrightCheck').checked = false;
-            isUploading = false;
-          }, 800);
-
-        } catch (error) {
-          clearInterval(uploadProgressInterval);
-          closeModal('uploadProgressModal');
-          console.error("Upload failed:", error);
-          showToast('Upload failed. Check console.', '❌');
-          isUploading = false;
         }
-      };
-
-      document.getElementById('cameraInput').addEventListener('change', (e) => handleFile(e, ' Camera'));
-      document.getElementById('galleryInput').addEventListener('change', (e) => handleFile(e, '🖼️ Gallery'));
-      document.getElementById('soundInput').addEventListener('change', (e) => handleFile(e, '🎵 Sound'));
-    }
-
-    function updateUploadProgress(percent, text) {
-      document.getElementById('uploadProgressBar').style.width = percent + '%';
-      document.getElementById('uploadStatusText').textContent = text;
-    }
-
-    function cancelUpload() {
-      if (isUploading) {
-        clearInterval(uploadProgressInterval);
-        closeModal('uploadProgressModal');
-        isUploading = false;
-        showToast('Upload cancelled', '⚠️');
-        document.getElementById('cameraInput').value = '';
-        document.getElementById('galleryInput').value = '';
-        document.getElementById('soundInput').value = '';
-      } else {
-        closeModal('uploadProgressModal');
-      }
-    }
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const page = btn.dataset.page;
-        if (page === 'home') { document.getElementById('profilePage').classList.remove('open'); closeAllModals(); } 
-        else if (page === 'discover') openModal('discoverModal'); 
-        else if (page === 'upload') openModal('uploadModal'); 
-        else if (page === 'inbox') openModal('inboxModal'); 
-        else if (page === 'profile') {
-            document.getElementById('profilePage').classList.add('open');
-            checkAuth();
-        }
-      });
-    });
-
-    document.querySelectorAll('.topbar .tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.topbar .tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    function closeAllModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); }
-    document.querySelectorAll('.modal').forEach(m => {
-      m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
-    });
-
-    async function checkAuth() {
-      try {
-        currentUser = await account.get();
-        showProfileView();
-      } catch (e) {
-        currentUser = null;
-        showAuthView();
-      }
-    }
-
-    function switchAuthTab(tab) {
-      const isLogin = tab === 'login';
-      document.getElementById('tabLogin').classList.toggle('active', isLogin);
-      document.getElementById('tabRegister').classList.toggle('active', !isLogin);
-      document.getElementById('authName').style.display = isLogin ? 'none' : 'block';
-      document.getElementById('authSubmitBtn').textContent = isLogin ? 'Login' : 'Create Account';
-      document.getElementById('authError').style.display = 'none';
-    }
-
-    async function handleAuth(e) {
-      e.preventDefault();
-      const isLogin = document.getElementById('tabLogin').classList.contains('active');
-      const email = document.getElementById('authEmail').value;
-      const password = document.getElementById('authPassword').value;
-      const name = document.getElementById('authName').value;
-      const errorDiv = document.getElementById('authError');
-      
-      errorDiv.style.display = 'none';
-      const submitBtn = document.getElementById('authSubmitBtn');
-      submitBtn.textContent = 'Processing...';
-      submitBtn.disabled = true;
-
-      try {
-        if (isLogin) {
-          await account.createEmailPasswordSession(email, password);
-        } else {
-          await account.create(ID.unique(), email, password, name);
-          await account.createEmailPasswordSession(email, password);
-        }
-        await checkAuth();
-        showToast(isLogin ? 'Welcome back!' : 'Account created successfully!', '✅');
-      } catch (err) {
-        errorDiv.textContent = err.message || 'Authentication failed';
-        errorDiv.style.display = 'block';
-      } finally {
-        submitBtn.textContent = isLogin ? 'Login' : 'Create Account';
-        submitBtn.disabled = false;
-      }
-    }
-
-    async function logout() {
-      try {
-        await account.deleteSession('current');
-        currentUser = null;
-        showAuthView();
-        showToast('Logged out successfully', '👋');
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function showAuthView() {
-      document.getElementById('authView').style.display = 'flex';
-      document.getElementById('profileView').style.display = 'none';
-      document.getElementById('profileGrid').innerHTML = '';
-    }
-
-    function showProfileView() {
-      document.getElementById('authView').style.display = 'none';
-      document.getElementById('profileView').style.display = 'flex';
-      
-      if (currentUser) {
-        document.getElementById('profileName').textContent = currentUser.name || 'User';
-        const handle = currentUser.name ? '@' + currentUser.name.toLowerCase().replace(/\s+/g, '_') : '@user';
-        document.getElementById('profileHandle').textContent = handle;
-        document.getElementById('profileAvatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
         
-        const savedBio = localStorage.getItem(`sarwai_bio_${currentUser.$id}`);
-        if (savedBio) {
-          document.getElementById('profileBio').textContent = savedBio;
-          document.getElementById('editBio').value = savedBio;
-        } else {
-          document.getElementById('profileBio').textContent = '🎬 Creating amazing content ✨';
-          document.getElementById('editBio').value = '🎬 Creating amazing content ✨';
+        function handleFullscreenChange() {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            
+            if (!isFullscreen) {
+                document.body.classList.remove('fullscreen-mode');
+                if (visibleVideoId && ytPlayers[visibleVideoId] && typeof ytPlayers[visibleVideoId].pauseVideo === 'function') {
+                    ytPlayers[visibleVideoId].pauseVideo();
+                }
+                visibleVideoId = null;
+            } else {
+                document.body.classList.add('fullscreen-mode');
+            }
         }
-        document.getElementById('editName').value = currentUser.name || '';
-        document.getElementById('nsfwToggle').checked = allowNSFW;
-      }
-      setupProfileGrid();
-      updateProfileStats();
-    }
-
-    async function saveProfile() {
-      if (!currentUser) {
-        showToast('Please login first', '⚠️');
-        return;
-      }
-      const name = document.getElementById('editName').value;
-      const bio = document.getElementById('editBio').value;
-      
-      try {
-        if (name.trim()) {
-          await account.updateName(name);
-          currentUser.name = name;
+        
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        function setupIntersectionObserver() {
+            if (observer) observer.disconnect();
+            
+            observer = new IntersectionObserver((entries) => {
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) return;
+                
+                entries.forEach(entry => {
+                    const videoId = entry.target.getAttribute('data-video-id');
+                    const player = ytPlayers[videoId];
+                    
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+                        if (player && typeof player.playVideo === 'function' && visibleVideoId !== videoId) {
+                            pauseAllVideos();
+                            player.playVideo();
+                            visibleVideoId = videoId;
+                        }
+                    } else {
+                        if (player && typeof player.pauseVideo === 'function' && visibleVideoId === videoId) {
+                            player.pauseVideo();
+                        }
+                    }
+                });
+            }, { 
+                threshold: [0.6, 0.8, 1.0],
+                rootMargin: '0px'
+            });
+            
+            document.querySelectorAll('.video-wrapper').forEach(wrapper => {
+                const videoId = wrapper.id.replace('wrapper_', '');
+                wrapper.setAttribute('data-video-id', videoId);
+                observer.observe(wrapper);
+            });
         }
-        localStorage.setItem(`sarwai_bio_${currentUser.$id}`, bio || '');
         
-        showProfileView();
-        closeModal('editProfileModal');
-        showToast('प्रोफ़ाइल अपडेट हो गई!', '✅');
-      } catch (err) {
-        showToast('अपडेट विफल: ' + err.message, '❌');
-      }
-    }
-
-    function toggleNSFWSetting(checked) {
-      allowNSFW = checked;
-      localStorage.setItem('sarwai_allow_nsfw', checked);
-      showToast(checked ? 'Sensitive content will now be shown' : 'Sensitive content hidden', '⚙️');
-      buildFeed();
-    }
-
-    function updateProfileStats() {
-      if (!currentUser) return;
-      const userVideos = videos.filter(v => v.userId === currentUser.$id);
-      const totalLikes = userVideos.reduce((sum, v) => sum + (parseInt(v.likes) || 0), 0);
-      document.getElementById('statLikes').textContent = formatCount(totalLikes);
-    }
-
-    function openEditVideoModal(docId) {
-      const video = videos.find(v => v.id === docId);
-      if (!video) {
-        showToast('वीडियो डेटा नहीं मिला', '⚠️');
-        return;
-      }
-      if (currentUser && video.userId !== currentUser.$id) {
-        showToast('You can only edit your own videos', '⚠️');
-        return;
-      }
-      document.getElementById('editVideoId').value = docId;
-      document.getElementById('editVideoTitle').value = video.title || '';
-      document.getElementById('editVideoDesc').value = video.desc || '';
-      openModal('editVideoModal');
-    }
-
-    async function saveVideoEdit() {
-      if (!currentUser) {
-        showToast('Please login first', '⚠️');
-        return;
-      }
-      const docId = document.getElementById('editVideoId').value;
-      const newTitle = document.getElementById('editVideoTitle').value;
-      const newDesc = document.getElementById('editVideoDesc').value;
-      const video = videos.find(v => v.id === docId);
-
-      if (!docId || !video) {
-        showToast('वीडियो ID नहीं मिली', '');
-        return;
-      }
-      if (video.userId !== currentUser.$id) {
-        showToast('You can only edit your own videos', '️');
-        return;
-      }
-
-      try {
-        await databases.updateRow(
-          APPWRITE_CONFIG.databaseId,
-          APPWRITE_CONFIG.tableId,
-          docId,
-          { title: newTitle, desc: newDesc }
-        );
-
-        video.title = newTitle;
-        video.desc = newDesc;
-        
-        buildFeed();
-        setupProfileGrid();
-        closeModal('editVideoModal');
-        showToast('वीडियो सफलतापूर्वक अपडेट हो गया!', '✅');
-      } catch (error) {
-        console.error("Update failed:", error);
-        showToast(`वीडियो अपडेट करने में विफल: ${error.message}`, '❌');
-      }
-    }
-
-    async function deleteVideo(docId, fileUrl) {
-      if (!currentUser) {
-        showToast('Please login to delete videos', '⚠️');
-        return;
-      }
-      const video = videos.find(v => v.id === docId);
-      if (video && video.userId !== currentUser.$id) {
-        showToast('You can only delete your own videos', '⚠️');
-        return;
-      }
-      if (!confirm('क्या आप वाकई इस वीडियो को हटाना चाहते हैं? यह एक्शन वापस नहीं लिया जा सकता।')) return;
-      
-      showToast('वीडियो हटाया जा रहा है...', '⏳');
-      try {
-        await databases.deleteRow(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.tableId, docId);
-        
-        if (fileUrl) {
-          const fileIdMatch = fileUrl.match(/\/files\/([^\/\?]+)/);
-          if (fileIdMatch && fileIdMatch[1]) {
-            await storage.deleteFile(APPWRITE_CONFIG.bucketId, fileIdMatch[1]).catch(() => {});
-          }
+        function pauseAllVideos() {
+            Object.values(ytPlayers).forEach(player => {
+                if (player && typeof player.pauseVideo === 'function') {
+                    player.pauseVideo();
+                }
+            });
+            visibleVideoId = null;
         }
-
-        videos = videos.filter(v => v.id !== docId);
-        allVideos = allVideos.filter(v => v.id !== docId);
         
-        buildFeed();
-        setupProfileGrid();
-        updateProfileStats();
-        showToast('वीडियो सफलतापूर्वक हटा दिया गया', '✅');
-      } catch (error) {
-        console.error("Delete failed:", error);
-        showToast(`वीडियो हटाने में विफल: ${error.message}`, '❌');
-      }
-    }
-
-    function setupProfileGrid() {
-      const grid = document.getElementById('profileGrid');
-      grid.innerHTML = '';
-      
-      if (!currentUser) {
-        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">Please login to view your profile.</div>';
-        return;
-      }
-      
-      const userVideos = videos.filter(v => v.userId === currentUser.$id);
-      
-      if (!userVideos || userVideos.length === 0) {
-        grid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#fff;opacity:.6">अभी तक कोई वीडियो अपलोड नहीं किया गया।</div>';
-        return;
-      }
-      
-      userVideos.forEach(v => {
-        const item = document.createElement('div');
-        item.className = 'grid-item';
-        item.dataset.id = v.id || '';
-        
-        item.innerHTML = `
-          <video src="${v.src || ''}" muted preload="metadata"></video>
-          <div class="views">▶ ${formatCount(parseInt(v.likes) || 0)}</div>
-          <div class="video-actions" style="position:absolute;top:6px;right:6px;display:flex;gap:6px;z-index:5;">
-            <button class="edit-video-btn" style="background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;backdrop-filter:blur(4px);cursor:pointer;" title="Edit">✏️</button>
-            <button class="delete-video-btn" style="background:rgba(0,0,0,0.6);color:#ff4444;border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;backdrop-filter:blur(4px);cursor:pointer;" title="Delete">🗑️</button>
-          </div>
-        `;
-        grid.appendChild(item);
-      });
-
-      grid.addEventListener('click', (e) => {
-        const editBtn = e.target.closest('.edit-video-btn');
-        const deleteBtn = e.target.closest('.delete-video-btn');
-        const gridItem = e.target.closest('.grid-item');
-        
-        if (!gridItem) return;
-        const docId = gridItem.dataset.id;
-        const video = videos.find(v => v.id === docId);
-        
-        if (!video) {
-          showToast('वीडियो डेटा नहीं मिला', '⚠️');
-          return;
+        function toggleLike(videoId, btn, currentCount) {
+            const isLiked = localStorage.getItem(`liked_${videoId}`) === 'true';
+            let count = currentCount;
+            
+            if (isLiked) {
+                localStorage.removeItem(`liked_${videoId}`);
+                count--;
+                btn.classList.remove('liked');
+                btn.querySelector('.icon').textContent = '🤍';
+            } else {
+                localStorage.setItem(`liked_${videoId}`, 'true');
+                count++;
+                btn.classList.add('liked');
+                btn.querySelector('.icon').textContent = '❤️';
+                showToast('❤️ पसंद किया!');
+            }
+            localStorage.setItem(`like_${videoId}`, count);
+            btn.querySelector('.label').textContent = count;
         }
-
-        if (editBtn) {
-          openEditVideoModal(docId);
-        } else if (deleteBtn) {
-          deleteVideo(docId, video.src);
+        
+        function toggleComments(videoId) {
+            const section = document.getElementById(`comments_${videoId}`);
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
-      });
-    }
-
-    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        if (query) {
-          showToast(`Searching for "${query}"...`, '🔍');
-          e.target.value = '';
-          closeModal('discoverModal');
-          
-          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-          document.querySelector('.nav-btn[data-page="home"]').classList.add('active');
-          document.getElementById('profilePage').classList.remove('open');
-
-          setTimeout(() => {
-            const filtered = allVideos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()) || v.user.toLowerCase().includes(query.toLowerCase()));
-            videos = filtered;
-            buildFeed();
-            if (filtered.length > 0) showToast(`Found ${filtered.length} results`, '✅');
-            else showToast(`No results found`, '⚠️');
-          }, 600);
+        
+        function addComment(videoId) {
+            const input = document.getElementById(`cinput_${videoId}`);
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const comments = JSON.parse(localStorage.getItem(`comments_${videoId}`) || '[]');
+            const name = localStorage.getItem('userName') || 'अतिथि';
+            comments.unshift({ name, text, time: Date.now() });
+            localStorage.setItem(`comments_${videoId}`, JSON.stringify(comments));
+            input.value = '';
+            showToast('✅ टिप्पणी जोड़ी गई!');
+            
+            const activeBtn = document.querySelector('.category-btn.active');
+            const category = activeBtn.textContent === 'सभी' ? 'all' : activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+            loadVideos(category);
         }
-      }
-    });
-
-    function enterCinematic() {
-      document.body.classList.add('cinematic-mode');
-      const hint = document.querySelector('.video-item .cinematic-hint');
-      if (hint) { hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 2000); }
-    }
-    function exitCinematic() {
-      document.body.classList.remove('cinematic-mode', 'controls-hidden', 'show-description', 'nav-hidden');
-    }
-    function checkOrientation() {
-      if (window.innerWidth > window.innerHeight && window.innerWidth > 700) enterCinematic();
-      else exitCinematic();
-    }
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
-
-    document.addEventListener('click', (e) => {
-      if (!document.body.classList.contains('cinematic-mode')) return;
-      if (e.target.closest('.cinematic-exit') || e.target.closest('.cinematic-description')) return;
-      document.body.classList.toggle('controls-hidden');
-      document.body.classList.toggle('nav-hidden');
-    });
-
-    let pressTimer;
-    document.addEventListener('touchstart', (e) => {
-      if (!document.body.classList.contains('cinematic-mode')) return;
-      pressTimer = setTimeout(() => document.body.classList.add('show-description'), 600);
-    });
-    document.addEventListener('touchend', () => {
-      clearTimeout(pressTimer);
-      document.body.classList.remove('show-description');
-    });
-
-    document.querySelectorAll('.keyboard-focus-input').forEach(input => {
-      input.addEventListener('focus', () => {
-        setTimeout(() => {
-          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-      });
-    });
-
-    async function initApp() {
-      await checkAuth();
-      fetchVideos();
-      setupUploadHandlers();
-      checkOrientation();
-    }
-    initApp();
-
-    document.body.addEventListener('touchmove', (e) => {
-      if (e.target.closest('.feed') || e.target.closest('.sheet') || e.target.closest('.profile-page')) return;
-      e.preventDefault();
-    }, { passive: false });
-</script>
+        
+        function deleteComment(videoId, index) {
+            const comments = JSON.parse(localStorage.getItem(`comments_${videoId}`) || '[]');
+            comments.splice(index, 1);
+            localStorage.setItem(`comments_${videoId}`, JSON.stringify(comments));
+            
+            const activeBtn = document.querySelector('.category-btn.active');
+            const category = activeBtn.textContent === 'सभी' ? 'all' : activeBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+            loadVideos(category);
+            showToast('🗑️ टिप्पणी हटाई गई');
+        }
+        
+        function openShare(videoId, title) {
+            currentShareId = videoId;
+            const video = videos.find(v => v.id === videoId);
+            window.currentShareUrl = `https://youtu.be/${video.youtubeId}`;
+            window.currentShareText = `${title} - बुंदेली बौछार में देखें`;
+            document.getElementById('shareModal').classList.add('show');
+        }
+        
+        function shareVia(platform) {
+            const url = encodeURIComponent(window.currentShareUrl);
+            const text = encodeURIComponent(window.currentShareText);
+            let shareUrl = '';
+            
+            switch(platform) {
+                case 'whatsapp': shareUrl = `https://wa.me/?text=${text}%20${url}`; break;
+                case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
+                case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+                case 'telegram': shareUrl = `https://t.me/share/url?url=${url}&text=${text}`; break;
+                case 'copy':
+                    navigator.clipboard.writeText(window.currentShareUrl).then(() => showToast('🔗 लिंक कॉपी हो गया!'));
+                    closeModal(); return;
+                case 'more':
+                    if (navigator.share) {
+                        navigator.share({ title: window.currentShareText, url: window.currentShareUrl });
+                    } else {
+                        showToast('⚠️ शेयर उपलब्ध नहीं');
+                    }
+                    closeModal(); return;
+            }
+            window.open(shareUrl, '_blank');
+            closeModal();
+        }
+        
+        function closeModal() { document.getElementById('shareModal').classList.remove('show'); }
+        
+        function openDownload(videoId, youtubeId) {
+            currentDownloadId = videoId;
+            const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+            document.getElementById('downloadLink').textContent = url;
+            window.currentDownloadUrl = url;
+            document.getElementById('downloadModal').classList.add('show');
+        }
+        
+        function copyDownloadLink() {
+            navigator.clipboard.writeText(window.currentDownloadUrl).then(() => showToast('📋 लिंक कॉपी हो गया!'));
+        }
+        
+        function openDownloader() {
+            window.open(`https://www.y2mate.com/youtube/${window.currentDownloadUrl.split('v=')[1]}`, '_blank');
+            closeDownloadModal();
+        }
+        
+        function closeDownloadModal() { document.getElementById('downloadModal').classList.remove('show'); }
+        
+        function filterCategory(category, btn) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadVideos(category);
+        }
+        
+        function showPage(page, navItem) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            navItem.classList.add('active');
+            
+            if (page === 'home') loadVideos();
+            else if (page === 'search') showToast('🔍 खोज सुविधा जल्द आ रही है!');
+            else if (page === 'upload') {
+                const name = prompt('अपना नाम दर्ज करें:');
+                if (name) { localStorage.setItem('userName', name); showToast(`स्वागत है ${name} जी! 🌾`); }
+            } else if (page === 'profile') {
+                const name = localStorage.getItem('userName') || 'अतिथि';
+                alert(`👤 प्रोफ़ाइल\n\nनाम: ${name}\n\n🌾 बुंदेली बौछार में आपका स्वागत है!`);
+            }
+        }
+        
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                setupIntersectionObserver();
+            }, 300);
+        });
+        
+        if (!localStorage.getItem('userName')) localStorage.setItem('userName', 'बुंदेली-प्रेमी');
+        loadVideos();
+    </script>
 </body>
 </html>
