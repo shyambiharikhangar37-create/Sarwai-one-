@@ -11,8 +11,8 @@
         html {
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
-            scroll-padding-top: 140px;    /* Header + Categories height adjustment */
-            scroll-padding-bottom: 80px;  /* Bottom nav height adjustment */
+            scroll-padding-top: 140px;
+            scroll-padding-bottom: 80px;
         }
         
         body {
@@ -71,7 +71,6 @@
             border: 1px solid #2a3a2a;
             position: relative;
             z-index: 1;
-            /* Scroll Snap Properties */
             scroll-snap-align: center;
             scroll-snap-stop: always;
         }
@@ -81,7 +80,7 @@
             padding-bottom: 56.25%;
             height: 0;
             background: #000;
-            overflow: visible;
+            overflow: hidden;
             z-index: 1000;
         }
         
@@ -184,7 +183,6 @@
             transform: scale(0.95);
         }
         
-        /* Compact action buttons - directly below video */
         .video-actions-compact {
             display: flex;
             justify-content: space-around;
@@ -233,7 +231,6 @@
             color: #aaa; 
         }
         
-        /* Ad container styles */
         .ad-container {
             background: #0f1410;
             padding: 12px 15px;
@@ -425,7 +422,6 @@
         
         .toast.show { opacity: 1; }
         
-        /* Hide UI elements completely during fullscreen */
         body.fullscreen-mode .header,
         body.fullscreen-mode .categories,
         body.fullscreen-mode .bottom-nav {
@@ -438,8 +434,16 @@
             overflow: hidden !important;
         }
 
-        /* Landscape Mode: Show ONLY video list, hide everything else */
+        /* ========================================================= */
+        /* FIXED LANDSCAPE MODE: Video fills screen completely       */
+        /* ========================================================= */
         @media (orientation: landscape) {
+            html {
+                scroll-snap-type: none !important;
+                scroll-padding-top: 0 !important;
+                scroll-padding-bottom: 0 !important;
+            }
+            
             .header,
             .categories,
             .bottom-nav,
@@ -454,58 +458,80 @@
                 background: #000 !important;
                 padding: 0 !important;
                 margin: 0 !important;
+                overflow: hidden !important;
             }
             
             .content {
                 padding: 0 !important;
-                padding-bottom: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
+                margin: 0 !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden !important;
             }
             
             .video-list {
                 padding: 0 !important;
-                height: auto !important;
-                overflow-y: visible !important;
+                margin: 0 !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                width: 100vw !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                scroll-snap-type: y mandatory !important;
+                scroll-padding: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 0 !important;
             }
             
             .video-card {
                 margin: 0 !important;
+                padding: 0 !important;
                 border-radius: 0 !important;
                 border: none !important;
-                border-bottom: 2px solid #2a3a2a !important;
-                height: auto !important;
-                min-height: auto !important;
-                max-height: none !important;
+                border-bottom: 1px solid #2a3a2a !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100vh !important;
+                min-height: 100dvh !important;
+                max-height: 100vh !important;
+                max-height: 100dvh !important;
+                width: 100vw !important;
                 background: #000 !important;
                 display: flex !important;
                 flex-direction: column !important;
                 flex-shrink: 0 !important;
-                width: 100% !important;
-                /* Ensure snap works in landscape too */
-                scroll-snap-align: center !important;
+                scroll-snap-align: start !important;
+                scroll-snap-stop: always !important;
+                overflow: hidden !important;
             }
             
             .video-wrapper {
                 width: 100% !important;
-                height: auto !important;
-                padding-bottom: 56.25% !important;
+                height: 100% !important;
+                padding-bottom: 0 !important; /* KEY FIX: Removed 56.25% */
                 position: relative !important;
                 background: #000 !important;
+                flex: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                overflow: hidden !important;
             }
             
             .youtube-player-div, 
             .youtube-player-div iframe {
                 width: 100% !important;
                 height: 100% !important;
+                min-width: 100% !important;
+                min-height: 100% !important;
                 position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 bottom: 0 !important;
+                border: none !important;
+                z-index: 1000 !important;
+                object-fit: contain !important;
             }
         }
     </style>
@@ -583,8 +609,6 @@
         let currentDownloadId = null;
         let observer = null;
         let visibleVideoId = null;
-        
-        // YouTube Player API Variables
         let ytPlayers = {};
         let isYtReady = false;
 
@@ -653,7 +677,6 @@
                         <div id="player_${video.id}" class="youtube-player-div"></div>
                     </div>
                     
-                    <!-- Compact action buttons directly below video -->
                     <div class="video-actions-compact">
                         <button class="action-btn-compact ${isLiked ? 'liked' : ''}" onclick="toggleLike(${video.id}, this, ${likeCount})">
                             <span class="icon">${isLiked ? '❤️' : '🤍'}</span>
@@ -677,13 +700,11 @@
                         </button>
                     </div>
                     
-                    <!-- Video info -->
                     <div class="video-info">
                         <div class="video-title">${video.title}</div>
                         <div class="video-desc">${video.desc}</div>
                     </div>
                     
-                    <!-- Ad container -->
                     <div class="ad-container">
                         <div class="ad-label">विज्ञापन</div>
                         <div class="ad-placeholder">
@@ -952,7 +973,6 @@
             }
         }
         
-        // Handle orientation change
         window.addEventListener('orientationchange', function() {
             setTimeout(() => {
                 setupIntersectionObserver();
