@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>बुंदेली बौछार BUNDELI BAUCHHAR</title>
+    <title>वीडियो ऐप</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -617,7 +617,6 @@
 </head>
 <body>
     <div class="header" id="mainHeader">
-        <h1 class="header-title">🌾 बुंदेली बौछार</h1>
         <div class="ad-frame">
             <div class="ad-placeholder">📢 विज्ञापन स्थान (Ad Space)</div>
         </div>
@@ -654,7 +653,7 @@
             <div style="padding: 20px; text-align: center;">
                 <h2 style="color: #f9a825; margin-bottom: 20px;">➕ वीडियो जोड़ें</h2>
                 <div style="background: #1a241a; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; border: 1px solid #2a3a2a;">
-                    <p style="color: #aaa; margin-bottom: 15px;">अपना बुंदेली वीडियो YouTube लिंक के साथ यहाँ साझा करें।</p>
+                    <p style="color: #aaa; margin-bottom: 15px;">अपना वीडियो YouTube लिंक के साथ यहाँ साझा करें।</p>
                     <input type="text" id="uploadTitle" placeholder="वीडियो का शीर्षक" style="width: 100%; background: #0f1410; color: #fff; border: 1px solid #2a3a2a; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 14px; outline: none;">
                     <input type="text" id="uploadYoutubeId" placeholder="YouTube लिंक या ID (जैसे: dQw4w9WgXcQ)" style="width: 100%; background: #0f1410; color: #fff; border: 1px solid #2a3a2a; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 14px; outline: none;">
                     <select id="uploadCategory" style="width: 100%; background: #0f1410; color: #fff; border: 1px solid #2a3a2a; border-radius: 8px; padding: 10px; margin-bottom: 15px; font-size: 14px; outline: none;">
@@ -674,7 +673,7 @@
             <div style="padding: 20px; text-align: center;">
                 <div style="width: 80px; height: 80px; background: #2e7d32; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 36px;">👤</div>
                 <h2 id="profileName" style="color: #f9a825; margin-bottom: 5px;">अतिथि</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">बुंदेली बौछार समुदाय के सदस्य</p>
+                <p style="color: #aaa; margin-bottom: 20px;">इस समुदाय के सदस्य</p>
                 
                 <div style="background: #1a241a; padding: 15px; border-radius: 12px; max-width: 400px; margin: 0 auto; border: 1px solid #2a3a2a; text-align: left;">
                     <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #2a3a2a; padding-bottom: 10px;">⚙️ सेटिंग्स</h3>
@@ -836,8 +835,8 @@
                     
                     <div class="promo-banner">
                         <div class="promo-text">
-                            🌾 बुंदेली बौछार ऐप को अपने दोस्तों को शेयर करें <br>
-                            और बौछार ऐप को फेमस करने में योगदान करें! 🚀
+                            📱 इस ऐप को अपने दोस्तों को शेयर करें <br>
+                            और इसे फेमस करने में योगदान करें! 🚀
                         </div>
                         <button class="promo-btn" onclick="shareApp()">
                             📤 अभी शेयर करें
@@ -1006,7 +1005,7 @@
             currentShareId = videoId;
             const video = videos.find(v => v.id === videoId);
             window.currentShareUrl = `https://youtu.be/${video.youtubeId}`;
-            window.currentShareText = `${title} - बुंदेली बौछार में देखें`;
+            window.currentShareText = `${title} - यहाँ देखें`;
             document.getElementById('shareModal').classList.add('show');
         }
         
@@ -1061,11 +1060,9 @@
             loadVideos(category);
         }
         
-        // ✅ नया: बॉटम नेविगेशन पेज स्विचिंग लॉजिक
         function showPage(page, navItem) {
             currentPage = page;
             
-            // नेविगेशन एक्टिव स्टेट अपडेट करें
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             if (navItem) {
                 navItem.classList.add('active');
@@ -1076,18 +1073,15 @@
                 if (idx !== -1 && navItems[idx]) navItems[idx].classList.add('active');
             }
 
-            // सभी पेज छुपाएं
             document.querySelectorAll('.page-section').forEach(section => {
                 section.style.display = 'none';
             });
 
-            // चुना हुआ पेज दिखाएं
             const targetPage = document.getElementById(`page-${page}`);
             if (targetPage) {
                 targetPage.style.display = 'block';
             }
 
-            // पेज-विशिष्ट लॉजिक
             if (page === 'home') {
                 loadVideos();
             } else if (page === 'search') {
@@ -1109,7 +1103,6 @@
             history.pushState({ page: page }, '', '#' + page);
         }
 
-        // ✅ नया: सर्च फ़ंक्शन
         function performSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const resultsContainer = document.getElementById('searchResults');
@@ -1154,7 +1147,6 @@
             return names[cat] || cat;
         }
 
-        // ✅ नया: वीडियो सबमिट फ़ंक्शन
         function submitVideo() {
             const title = document.getElementById('uploadTitle').value.trim();
             const youtubeId = document.getElementById('uploadYoutubeId').value.trim();
@@ -1192,7 +1184,6 @@
             }, 1000);
         }
 
-        // ✅ नया: प्रोफ़ाइल फ़ंक्शन्स
         function saveProfile() {
             const name = document.getElementById('profileNameInput').value.trim();
             if (name) {
@@ -1207,7 +1198,7 @@
         function clearAllData() {
             if (confirm('क्या आप वाकई सभी लाइक, कमेंट और सेटिंग्स साफ़ करना चाहते हैं?')) {
                 localStorage.clear();
-                localStorage.setItem('userName', 'बुंदेली-प्रेमी');
+                localStorage.setItem('userName', 'उपयोगकर्ता');
                 showToast('🗑️ सभी डेटा साफ़ कर दिया गया!');
                 setTimeout(() => location.reload(), 1000);
             }
@@ -1215,10 +1206,10 @@
 
         function shareApp() {
             const appUrl = window.location.href;
-            const shareText = "🌾 बुंदेली बौछार ऐप जरूर देखें! बुंदेलखंड की माटी की महक - गीत, नाटक, कहानियाँ। अभी देखें और फेमस करने में योगदान करें: " + appUrl;
+            const shareText = "यह वीडियो ऐप जरूर देखें! गीत, नाटक, कहानियाँ। अभी देखें और फेमस करने में योगदान करें: " + appUrl;
             
             if (navigator.share) {
-                navigator.share({ title: 'बुंदेली बौछार', text: shareText, url: appUrl }).catch(() => {});
+                navigator.share({ title: 'वीडियो ऐप', text: shareText, url: appUrl }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(shareText).then(() => {
                     showToast('📋 शेयर मैसेज कॉपी हो गया! दोस्तों को भेजें।');
@@ -1273,9 +1264,8 @@
             setTimeout(() => { setupIntersectionObserver(); }, 300);
         });
         
-        if (!localStorage.getItem('userName')) localStorage.setItem('userName', 'बुंदेली-प्रेमी');
+        if (!localStorage.getItem('userName')) localStorage.setItem('userName', 'उपयोगकर्ता');
         
-        // ✅ हैश के आधार पर सही पेज लोड करें
         const initialHash = window.location.hash.replace('#', '') || 'home';
         showPage(initialHash, null);
     </script>
