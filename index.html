@@ -11,7 +11,7 @@
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             scroll-padding-top: 100px;
-            scroll-padding-bottom: 80px;
+            scroll-padding-bottom: 140px; /* Adjusted for sticky bottom ad */
         }
         
         body {
@@ -108,6 +108,53 @@
             z-index: 1;
             scroll-snap-align: center;
             scroll-snap-stop: always;
+        }
+        
+        /* Ad Card Styling */
+        .ad-card {
+            background: #1a241a;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            border: 1px dashed #f9a825;
+            position: relative;
+            z-index: 1;
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+
+        .ad-card-label {
+            background: rgba(249, 168, 37, 0.15);
+            color: #f9a825;
+            font-size: 10px;
+            text-align: center;
+            padding: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(249, 168, 37, 0.3);
+        }
+
+        .ad-card-content {
+            padding: 20px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .ad-card-content h3 {
+            color: #f9a825;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .ad-card-content p {
+            color: #aaa;
+            font-size: 12px;
         }
         
         .video-wrapper {
@@ -278,17 +325,38 @@
         .action-btn-compact.liked { color: #c62828; }
         .action-btn-compact .icon { font-size: 18px; }
         .action-btn-compact .label { font-size: 10px; }
+
+        /* Banner Ad Below Video */
+        .video-banner-ad {
+            padding: 8px;
+            background: #1a241a;
+            border-top: 1px solid #2a3a2a;
+            text-align: center;
+        }
+
+        .video-banner-ad-inner {
+            background: rgba(249, 168, 37, 0.1);
+            border: 1px dashed rgba(249, 168, 37, 0.4);
+            border-radius: 6px;
+            padding: 10px;
+            color: #f9a825;
+            font-size: 12px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         
         .promo-banner {
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #f9a825 100%);
             background-size: 200% 200%;
-            border-radius: 12px;
-            padding: 14px 15px;
-            margin: 0 10px 15px 10px;
+            border-radius: 8px;
+            padding: 10px 12px; /* थोड़ा कम किया */
+            margin: 10px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(249, 168, 37, 0.25);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
@@ -311,10 +379,10 @@
 
         .promo-text {
             color: #fff;
-            font-size: 13px;
+            font-size: 12px; /* थोड़ा कम किया */
             font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 10px;
+            line-height: 1.3;
+            margin-bottom: 8px;
             position: relative;
             z-index: 2;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -324,9 +392,9 @@
             background: #fff;
             color: #1b5e20;
             border: none;
-            padding: 8px 18px;
+            padding: 6px 14px; /* थोड़ा कम किया */
             border-radius: 25px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -421,46 +489,85 @@
         
         .modal.show { display: flex; }
         
+        /* 🔥 UPDATED: Modal Content Height Reduced by ~50% */
         .modal-content {
             background: #1a241a;
             border-radius: 12px;
-            padding: 20px;
+            padding: 10px; /* 20px से घटाकर 10px किया */
             width: 90%;
             max-width: 350px;
         }
         
-        .modal-content h3 { color: #f9a825; margin-bottom: 15px; text-align: center; }
+        .modal-content h3 { 
+            color: #f9a825; 
+            margin-bottom: 8px; /* 15px से घटाकर 8px किया */
+            text-align: center; 
+            font-size: 15px;
+        }
         
         .share-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 6px; /* 12px से घटाकर 6px किया */
+            margin-bottom: 8px; /* 15px से घटाकर 8px किया */
         }
         
         .share-btn {
             background: #2a3a2a;
             border: none;
             color: #fff;
-            padding: 14px 8px;
+            padding: 6px 4px; /* 14px 8px से घटाकर 6px 4px किया */
             border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 11px; /* 13px से घटाकर 11px किया */
             text-align: center;
         }
         
         .share-btn:hover { background: #3a4a3a; }
-        .share-btn .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .share-btn .icon { 
+            font-size: 20px; /* 28px से घटाकर 20px किया */
+            display: block; 
+            margin-bottom: 2px; /* 4px से घटाकर 2px किया */
+        }
         
         .close-modal {
             width: 100%;
             background: #c62828;
             color: #fff;
             border: none;
-            padding: 10px;
+            padding: 8px; /* 10px से घटाकर 8px किया */
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        /* Sticky Bottom Ad */
+        .sticky-bottom-ad {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: #1a241a;
+            border-top: 1px solid #2a3a2a;
+            padding: 6px 10px;
+            z-index: 999;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+        }
+
+        .sticky-bottom-ad-inner {
+            background: rgba(249, 168, 37, 0.1);
+            border: 1px dashed rgba(249, 168, 37, 0.5);
+            border-radius: 6px;
+            padding: 8px;
+            color: #f9a825;
+            font-size: 11px;
+            max-width: 320px;
+            margin: 0 auto;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .bottom-nav {
@@ -487,14 +594,14 @@
         .nav-item.active { color: #f9a825; }
         .nav-item span { display: block; font-size: 10px; margin-top: 4px; }
         
-        .content { padding-bottom: 70px; }
+        .content { padding-bottom: 140px; }
         
         .categories::-webkit-scrollbar { display: none; }
         .categories { -ms-overflow-style: none; scrollbar-width: none; }
         
         .toast {
             position: fixed;
-            bottom: 90px;
+            bottom: 150px;
             left: 50%;
             transform: translateX(-50%);
             background: #2e7d32;
@@ -512,7 +619,11 @@
         
         body.fullscreen-mode .header,
         body.fullscreen-mode .categories,
-        body.fullscreen-mode .bottom-nav {
+        body.fullscreen-mode .bottom-nav,
+        body.fullscreen-mode .sticky-bottom-ad,
+        body.fullscreen-mode .ad-card,
+        body.fullscreen-mode .video-banner-ad,
+        body.fullscreen-mode .promo-banner {
             display: none !important;
         }
         body.fullscreen-mode .content {
@@ -529,7 +640,7 @@
                 scroll-padding-bottom: 0 !important;
             }
             
-            .header, .categories, .bottom-nav, .video-actions-compact, .video-info-compact, .promo-banner, .comment-section {
+            .header, .categories, .bottom-nav, .sticky-bottom-ad, .ad-card, .video-actions-compact, .video-info-compact, .video-banner-ad, .promo-banner, .comment-section {
                 display: none !important;
             }
             
@@ -623,7 +734,6 @@
     </div>
     
     <div class="content">
-        <!-- होम पेज -->
         <div id="page-home" class="page-section">
             <div class="categories" id="mainCategories">
                 <button class="category-btn active" onclick="filterCategory('all', this)">सभी</button>
@@ -636,7 +746,6 @@
             <div class="video-list" id="videoList"></div>
         </div>
 
-        <!-- खोज पेज -->
         <div id="page-search" class="page-section" style="display: none;">
             <div style="padding: 20px; text-align: center;">
                 <h2 style="color: #f9a825; margin-bottom: 20px;">🔍 वीडियो खोजें</h2>
@@ -648,7 +757,6 @@
             </div>
         </div>
 
-        <!-- अपलोड पेज -->
         <div id="page-upload" class="page-section" style="display: none;">
             <div style="padding: 20px; text-align: center;">
                 <h2 style="color: #f9a825; margin-bottom: 20px;">➕ वीडियो जोड़ें</h2>
@@ -668,7 +776,6 @@
             </div>
         </div>
 
-        <!-- प्रोफ़ाइल पेज -->
         <div id="page-profile" class="page-section" style="display: none;">
             <div style="padding: 20px; text-align: center;">
                 <div style="width: 80px; height: 80px; background: #2e7d32; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 36px;">👤</div>
@@ -685,6 +792,13 @@
                     <button onclick="clearAllData()" style="width: 100%; background: #c62828; color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 14px;">सभी डेटा साफ़ करें</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Sticky Bottom Ad (Above Navigation Bar) -->
+    <div class="sticky-bottom-ad" id="stickyBottomAd">
+        <div class="sticky-bottom-ad-inner">
+            <span>📢 Sticky Ad (320x50) - यहाँ Ad Code पेस्ट करें</span>
         </div>
     </div>
     
@@ -713,12 +827,12 @@
     <div class="modal" id="downloadModal">
         <div class="modal-content">
             <h3>⬇️ डाउनलोड करें</h3>
-            <p style="color: #aaa; font-size: 13px; margin-bottom: 15px; text-align: center;">
+            <p style="color: #aaa; font-size: 12px; margin-bottom: 10px; text-align: center;">
                 वीडियो डाउनलोड करने के लिए लिंक कॉपी करें:
             </p>
-            <div style="background: #0f1410; padding: 10px; border-radius: 8px; word-break: break-all; font-size: 12px; margin-bottom: 12px;" id="downloadLink"></div>
-            <button class="share-btn" style="width: 100%; margin-bottom: 10px;" onclick="copyDownloadLink()">📋 लिंक कॉपी करें</button>
-            <button class="share-btn" style="width: 100%; margin-bottom: 10px; background: #2e7d32;" onclick="openDownloader()">🔽 डाउनलोडर खोलें</button>
+            <div style="background: #0f1410; padding: 8px; border-radius: 8px; word-break: break-all; font-size: 11px; margin-bottom: 10px;" id="downloadLink"></div>
+            <button class="share-btn" style="width: 100%; margin-bottom: 8px;" onclick="copyDownloadLink()">📋 लिंक कॉपी करें</button>
+            <button class="share-btn" style="width: 100%; margin-bottom: 8px; background: #2e7d32;" onclick="openDownloader()">🔽 डाउनलोडर खोलें</button>
             <button class="close-modal" onclick="closeDownloadModal()">बंद करें</button>
         </div>
     </div>
@@ -726,16 +840,11 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const videos = [
-            { id: 1, title: "हरदौल की लीला - बुंदेली नाटक", desc: "बुंदेलखंड की प्रसिद्ध लोक कथा", category: "drama", youtubeId: "4NpfAs5_vLs" },
-            { id: 2, title: "बुंदेली लोकगीत - रैया", desc: "माटी की खुशबू भरे गीत", category: "song", youtubeId: "o0bkp9zwNk4" },
-            { id: 3, title: "बुंदेली हास्य कवि सम्मेलन", desc: "हँसी-मज़ाक का मेला", category: "comedy", youtubeId: "dQw4w9WgXcQ" },
-            { id: 4, title: "छाँद कौरी की कहानी", desc: "बुंदेलखंड की प्रेम कथा", category: "story", youtubeId: "juKd26qkWAo" },
-            { id: 5, title: "दीवारियाँ नाटक - बुंदेली", desc: "समाज पर व्यंग्य", category: "drama", youtubeId: "kqtD5dpn9C8" },
-            { id: 6, title: "बुंदेली संस्कृति और त्योहार", desc: "हमारी पहचान, हमारी धरोहर", category: "culture", youtubeId: "wNDGgL73ihY" },
-            { id: 7, title: "लाला हार्डोल को जहर पिलाने की कहानी", desc: "भारतीय साहित्य और बुंदेलखंड की गाथा", category: "story", youtubeId: "bu8s60bzVZY" }
-        ];
+        // Google Sheet CSV URL
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1EoTOSqfvan9yeUGw05eTssOFVW67vsuPUB0ayhG-YEg/export?format=csv&gid=0";
         
+        let videos = [];
+        let isLoadingVideos = false;
         let currentShareId = null;
         let currentDownloadId = null;
         let observer = null;
@@ -745,10 +854,96 @@
         let currentPage = 'home';
         let lastBackPressTime = 0;
         const EXIT_DELAY = 2000;
+        let isOrientationChanging = false;
+
+        // Robust CSV Line Parser
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        // Parse full CSV text into video objects
+        function parseCSV(csvText) {
+            // Remove BOM if present
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.slice(1);
+            }
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 2) return [];
+            
+            const headers = parseCSVLine(lines[0]);
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length < headers.length) continue;
+                
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header.trim()] = values[index] ? values[index].trim() : '';
+                });
+                
+                if (row.id) {
+                    result.push({
+                        id: parseInt(row.id) || i,
+                        title: row.title || 'अज्ञात शीर्षक',
+                        desc: row.desc || 'विवरण उपलब्ध नहीं',
+                        category: row.category || 'all',
+                        youtubeId: row.youtubeId || ''
+                    });
+                }
+            }
+            return result;
+        }
+
+        // Fetch videos from Google Sheet
+        async function loadVideosFromSheet() {
+            if (isLoadingVideos || videos.length > 0) return;
+            isLoadingVideos = true;
+            try {
+                showToast("🔄 वीडियो लोड हो रहे हैं...");
+                const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const csvText = await response.text();
+                videos = parseCSV(csvText);
+                loadVideos();
+            } catch (error) {
+                console.error("Error loading videos:", error);
+                showToast("⚠️ वीडियो लोड करने में त्रुटि");
+                videos = [];
+                loadVideos();
+            } finally {
+                isLoadingVideos = false;
+            }
+        }
 
         window.onYouTubeIframeAPIReady = function() {
             isYtReady = true;
-            initializePlayers();
+            if (videos.length > 0) {
+                initializePlayers();
+            }
         };
 
         function initializePlayers() {
@@ -790,7 +985,12 @@
             
             const filtered = category === 'all' ? videos : videos.filter(v => v.category === category);
             
-            filtered.forEach(video => {
+            if (filtered.length === 0) {
+                videoList.innerHTML = '<div style="padding: 40px; text-align: center; color: #aaa;">कोई वीडियो उपलब्ध नहीं है।</div>';
+                return;
+            }
+            
+            filtered.forEach((video, index) => {
                 const likeCount = parseInt(localStorage.getItem(`like_${video.id}`) || '0');
                 const isLiked = localStorage.getItem(`liked_${video.id}`) === 'true';
                 const comments = JSON.parse(localStorage.getItem(`comments_${video.id}`) || '[]');
@@ -832,6 +1032,13 @@
                             <span class="label">फुल स्क्रीन</span>
                         </button>
                     </div>
+
+                    <!-- Banner Ad Below Video (300x250) -->
+                    <div class="video-banner-ad">
+                        <div class="video-banner-ad-inner">
+                            📢 बैनर विज्ञापन (300x250) - Ad Code यहाँ डालें
+                        </div>
+                    </div>
                     
                     <div class="promo-banner">
                         <div class="promo-text">
@@ -860,6 +1067,20 @@
                     </div>
                 `;
                 videoList.appendChild(card);
+
+                // 🔥 हर 2 वीडियो के बाद एक "In-Feed" विज्ञापन कार्ड जोड़ें
+                if ((index + 1) % 2 === 0 && index !== filtered.length - 1) {
+                    const adCard = document.createElement('div');
+                    adCard.className = 'ad-card';
+                    adCard.innerHTML = `
+                        <div class="ad-card-label">विज्ञापन</div>
+                        <div class="ad-card-content">
+                            <h3>📢 In-Feed विज्ञापन</h3>
+                            <p>(AdSense Native / Banner Code यहाँ पेस्ट करें)</p>
+                        </div>
+                    `;
+                    videoList.appendChild(adCard);
+                }
             });
             
             if (isYtReady) setTimeout(initializePlayers, 100);
@@ -913,7 +1134,9 @@
         
         function setupIntersectionObserver() {
             if (observer) observer.disconnect();
+            
             observer = new IntersectionObserver((entries) => {
+                if (isOrientationChanging) return;
                 if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) return;
                 
                 entries.forEach(entry => {
@@ -921,7 +1144,9 @@
                     const player = ytPlayers[videoId];
                     
                     if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-                        if (player && typeof player.playVideo === 'function' && visibleVideoId !== videoId) {
+                        if (visibleVideoId === videoId) return;
+                        
+                        if (player && typeof player.playVideo === 'function') {
                             pauseAllVideos();
                             player.playVideo();
                             visibleVideoId = videoId;
@@ -929,6 +1154,7 @@
                     } else {
                         if (player && typeof player.pauseVideo === 'function' && visibleVideoId === videoId) {
                             player.pauseVideo();
+                            visibleVideoId = null;
                         }
                     }
                 });
@@ -1083,7 +1309,11 @@
             }
 
             if (page === 'home') {
-                loadVideos();
+                if (videos.length === 0 && !isLoadingVideos) {
+                    loadVideosFromSheet();
+                } else {
+                    loadVideos();
+                }
             } else if (page === 'search') {
                 setTimeout(() => {
                     const searchInput = document.getElementById('searchInput');
@@ -1261,7 +1491,27 @@
         });
 
         window.addEventListener('orientationchange', function() {
-            setTimeout(() => { setupIntersectionObserver(); }, 300);
+            isOrientationChanging = true;
+            const currentPlayingVideoId = visibleVideoId;
+            
+            setTimeout(() => {
+                isOrientationChanging = false;
+                if (currentPlayingVideoId && ytPlayers[currentPlayingVideoId]) {
+                    Object.values(ytPlayers).forEach(player => {
+                        if (player && typeof player.pauseVideo === 'function') {
+                            player.pauseVideo();
+                        }
+                    });
+                    
+                    const currentPlayer = ytPlayers[currentPlayingVideoId];
+                    if (currentPlayer && typeof currentPlayer.playVideo === 'function') {
+                        setTimeout(() => {
+                            currentPlayer.playVideo();
+                            visibleVideoId = currentPlayingVideoId;
+                        }, 300);
+                    }
+                }
+            }, 500);
         });
         
         if (!localStorage.getItem('userName')) localStorage.setItem('userName', 'उपयोगकर्ता');
